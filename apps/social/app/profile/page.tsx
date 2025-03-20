@@ -1,15 +1,10 @@
 'use client';
 
-import { withAuth } from '@/components/auth-contanier/AuthContainer';
-import { HomeContainer } from '@/components/home-contanier';
-import { ProfileContainer } from '@/components/profile-contanier';
+import { withAuth } from '@/container/auth-contanier/AuthContainer';
+import { ProfileContainer } from '@/container/profile-contanier';
 
 const ProfilePage = () => {
-  return (
-    <HomeContainer>
-      <ProfileContainer />
-    </HomeContainer>
-  );
+  return <ProfileContainer />;
 };
 
 // 使用 withAuth 高阶组件包装页面组件

@@ -14,7 +14,7 @@ import { useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
-import { Label } from '../ui/label';
+import { Label } from '../../components/ui/label';
 
 const profileSchema = z.object({
   name: z.string().min(2, '名字至少需要2个字符'),

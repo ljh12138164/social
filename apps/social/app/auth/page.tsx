@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { LoginForm } from '@/components/auth-contanier/LoginForm';
-import { SignupForm } from '@/components/auth-contanier/SignupForm';
+import { LoginForm } from '@/container/auth-contanier/LoginForm';
+import { SignupForm } from '@/container/auth-contanier/SignupForm';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuthCheck } from '@/http/useAuth';

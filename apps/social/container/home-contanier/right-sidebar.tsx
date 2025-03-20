@@ -2,13 +2,19 @@
 import { Button } from '@/components/ui/button';
 import { Search } from 'lucide-react';
 import { usePathname } from 'next/navigation';
-const SHOWN_SIDEBAR_PATHS = ['/profile', '/profile/edit'];
+// 需要显示右侧栏的页面
+const SHOWN_SIDEBAR_PATHS = [
+  '/profile',
+  '/profile/edit',
+  '/messages',
+  '/friends',
+];
 export const RightSidebar = () => {
   const pathname = usePathname();
   const isShown = SHOWN_SIDEBAR_PATHS.includes(pathname);
   if (isShown) return null;
   return (
-    <div className='w-[350px] p-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+    <div className='w-[350px] p-4 hidden bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 xl:block'>
       {/* 搜索框 */}
       <div className='sticky top-4 space-y-4'>
         <div className='relative group'>
@@ -21,7 +27,7 @@ export const RightSidebar = () => {
         </div>
 
         {/* 推荐关注 */}
-        <div className='rounded-xl bg-muted/60 p-4 shadow-sm hover:shadow-md transition-all'>
+        <div className='rounded-xl  bg-muted/60 p-4 shadow-sm hover:shadow-md transition-all'>
           <h2 className='text-xl font-bold mb-4'>推荐关注</h2>
           <div className='space-y-4'>
             {[1, 2, 3].map((i) => (

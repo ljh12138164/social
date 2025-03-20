@@ -1,5 +1,6 @@
 from django.db.models import Q
 from django.http import JsonResponse
+from django.http.response import HttpResponseBadRequest
 
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 
@@ -120,7 +121,7 @@ def post_like(request, pk):
 
         return JsonResponse({'message': 'like created'})
     else:
-        return JsonResponse({'message': 'post already liked'})
+        return HttpResponseBadRequest({'message': 'post already liked'})
 
 
 @api_view(['POST'])

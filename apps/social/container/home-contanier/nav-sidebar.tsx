@@ -1,14 +1,22 @@
+'use client';
 import { Button } from '@/components/ui/button';
 import { Home, Search, Bell, Mail, User, MoreHorizontal } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { useProfile } from '@/http/useAuth';
+import { UserAvatar } from '../profile-contanier/UserAvatar';
 
 const navItems = [
   {
     label: '首页',
     icon: Home,
     href: '/home',
+  },
+  {
+    label: '好友',
+    icon: User,
+    href: '/friends',
   },
   {
     label: '探索',
@@ -34,6 +42,7 @@ const navItems = [
 
 export const NavSidebar = () => {
   const pathname = usePathname();
+  const { data: profile, isLoading } = useProfile();
 
   return (
     <div className='fixed w-[275px] h-screen border-r border-border/40 px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
@@ -56,7 +65,7 @@ export const NavSidebar = () => {
         {/* 导航菜单 */}
         <nav className='flex-1 space-y-1'>
           {navItems.map((item) => {
-            const isActive = pathname === item.href;
+            const isActive = pathname.startsWith(item.href);
             const Icon = item.icon;
 
             return (
@@ -64,7 +73,7 @@ export const NavSidebar = () => {
                 <Button
                   variant='ghost'
                   className={cn(
-                    'w-full justify-start gap-4 text-lg font-medium transition-colors group relative',
+                    'w-full justify-start gap-4 h-12 text-lg font-medium transition-colors group relative hover:bg-accent/80',
                     isActive ? 'text-primary font-bold' : 'hover:bg-accent/80'
                   )}
                 >
@@ -91,26 +100,20 @@ export const NavSidebar = () => {
           })}
         </nav>
 
-        {/* 发推按钮 */}
-        <Button className='w-full rounded-full h-12 text-lg font-bold mt-4 shadow-sm hover:shadow-md transition-all bg-primary hover:bg-primary/90 hover:scale-105 active:scale-95'>
-          发推
-        </Button>
-
         {/* 用户信息 */}
         <div className='flex items-center gap-3 p-4 hover:bg-accent/80 rounded-full cursor-pointer mt-auto mb-4 transition-colors group relative'>
-          <div className='w-10 h-10 rounded-full bg-muted shadow-sm group-hover:ring-2 group-hover:ring-primary transition-all'></div>
+          <UserAvatar
+            src={profile?.avatar}
+            alt={profile?.name || '用户'}
+            className='w-12 h-12 rounded-full bg-muted shadow-sm group-hover:ring-2 group-hover:ring-primary transition-all'
+          />
           <div className='flex-1'>
             <div className='font-bold group-hover:text-primary transition-colors'>
               用户名
             </div>
-            <div className='text-sm text-muted-foreground'>@username</div>
+            <div className='text-sm text-muted-foreground'>{profile?.name}</div>
           </div>
           <MoreHorizontal className='h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors' />
-
-          {/* 悬浮提示 */}
-          <div className='absolute bottom-full left-0 mb-2 w-full p-4 bg-popover rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity invisible group-hover:visible'>
-            <div className='text-sm font-medium'>切换账号或退出登录</div>
-          </div>
         </div>
       </div>
     </div>

@@ -2,9 +2,9 @@
 
 import { withAuth } from '@/container/auth-contanier/AuthContainer';
 
-const HomePage = ({ children }: { children: React.ReactNode }) => {
-  return children;
+const MessagesPage = () => {
+  return <div>123</div>;
 };
 
 // 使用 withAuth 高阶组件包装页面组件
-export default withAuth(HomePage);
+export default withAuth(MessagesPage);

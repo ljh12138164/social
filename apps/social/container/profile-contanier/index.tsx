@@ -2,9 +2,8 @@
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useProfile } from '@/http/useAuth';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { AVATAR_URL } from '@/lib';
+import { UserAvatar } from './UserAvatar';
 export { ProfileEditForm } from './ProfileEditForm';
 
 export const ProfileContainer = () => {
@@ -16,23 +15,12 @@ export const ProfileContainer = () => {
     return <></>;
   }
 
-  const avatarUrl = profile.avatar || AVATAR_URL;
-
   return (
     <div className='min-h-screen'>
       {/* 封面图 */}
       <div className='h-48 bg-gradient-to-r from-blue-400 to-blue-600 relative'>
         <div className='absolute -bottom-16 left-4 sm:left-8'>
-          <div className='w-32 h-32 rounded-full border-4 border-background bg-muted relative overflow-hidden'>
-            {/* 头像 */}
-            <Image
-              src={avatarUrl}
-              alt={profile.name}
-              fill
-              className='object-cover'
-              sizes='(max-width: 128px) 100vw, 128px'
-            />
-          </div>
+          <UserAvatar src={profile.avatar} alt={profile.name} size='lg' />
         </div>
       </div>
       {/* 个人信息 */}

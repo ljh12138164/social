@@ -1,22 +1,25 @@
 'use client';
 
-import { withAuth } from '@/components/auth-contanier/AuthContainer';
-import { HomeContainer } from '@/components/home-contanier';
+import Emoji from '@/components/ChatEmoji';
 import { Button } from '@/components/ui/button';
-import {
-  Loader2,
-  MessageSquare,
-  Repeat2,
-  Heart,
-  Share2,
-  Image,
-  Smile,
-} from 'lucide-react';
-import { usePosts, useCreatePost } from '@/http/usePost';
-import { useState } from 'react';
+import { Textarea } from '@/components/ui/textarea';
+import { withAuth } from '@/container/auth-contanier/AuthContainer';
+import { UserAvatar } from '@/container/profile-contanier/UserAvatar';
+import { useProfile } from '@/http/useAuth';
+import { useCreatePost, usePosts } from '@/http/usePost';
+import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { cn } from '@/lib/utils';
+import {
+  Heart,
+  Image,
+  Loader2,
+  MessageSquare,
+  Share2,
+  Smile,
+} from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
 
 const HomePage = () => {
   const [newPost, setNewPost] = useState('');
@@ -25,7 +28,8 @@ const HomePage = () => {
   );
   const { data: posts, isLoading } = usePosts();
   const createPost = useCreatePost();
-
+  const { data: profile } = useProfile();
+  const router = useRouter();
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
     createPost.mutate(
@@ -39,7 +43,7 @@ const HomePage = () => {
   };
 
   return (
-    <HomeContainer>
+    <>
       {/* 顶部导航 */}
       <div className='sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/40 z-10'>
         <div className='flex items-center justify-between p-4'>
@@ -84,9 +88,13 @@ const HomePage = () => {
       {/* 发推框 */}
       <div className='p-4 border-b border-border/40'>
         <div className='flex gap-4'>
-          <div className='w-10 h-10 rounded-full bg-muted shadow-sm'></div>
+          <UserAvatar
+            src={profile?.avatar}
+            alt={profile?.name || '用户'}
+            size='md'
+          />
           <div className='flex-1'>
-            <textarea
+            <Textarea
               value={newPost}
               onChange={(e) => setNewPost(e.target.value)}
               placeholder='有什么新鲜事想分享给大家？'
@@ -102,13 +110,19 @@ const HomePage = () => {
                 >
                   <Image className='h-5 w-5' />
                 </Button>
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  className='text-primary hover:bg-primary/10 transition-colors rounded-full'
+                <Emoji
+                  onClick={(e) => {
+                    setNewPost(newPost + e.native);
+                  }}
                 >
-                  <Smile className='h-5 w-5' />
-                </Button>
+                  <Button
+                    variant='ghost'
+                    size='icon'
+                    className='text-primary hover:bg-primary/10 transition-colors rounded-full'
+                  >
+                    <Smile className='h-5 w-5' />
+                  </Button>
+                </Emoji>
               </div>
               <Button
                 onClick={handleCreatePost}
@@ -140,15 +154,17 @@ const HomePage = () => {
           posts?.map((post) => (
             <div
               key={post.id}
+              onClick={() => {
+                router.push(`/post/${post.id}`);
+              }}
               className='p-4 hover:bg-accent/40 cursor-pointer transition-colors'
             >
               <div className='flex gap-4'>
                 <div className='w-10 h-10 rounded-full bg-muted shadow-sm overflow-hidden group'>
-                  {post.user.avatar && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={post.user.avatar}
-                      alt={post.user.name}
+                  {post.created_by.get_avatar && (
+                    <UserAvatar
+                      src={post.created_by.get_avatar}
+                      alt={post.created_by.name}
                       className='w-full h-full object-cover transition-transform group-hover:scale-110'
                     />
                   )}
@@ -156,13 +172,13 @@ const HomePage = () => {
                 <div className='flex-1 space-y-2'>
                   <div className='flex items-center gap-2'>
                     <span className='font-bold hover:underline cursor-pointer'>
-                      {post.user.name}
+                      {post.created_by.name}
                     </span>
                     <span className='text-muted-foreground hover:underline cursor-pointer'>
-                      @user{post.user.id}
+                      @{post.created_by.email}
                     </span>
                     <span className='text-muted-foreground'>·</span>
-                    <span className='text-muted-foreground hover:underline cursor-pointer'>
+                    <span className='text-muted-foreground hover:underline cursor-pointer ml-auto'>
                       {format(new Date(post.created_at), 'PP', {
                         locale: zhCN,
                       })}
@@ -178,16 +194,6 @@ const HomePage = () => {
                       <MessageSquare className='h-4 w-4 transition-transform group-hover:scale-110' />
                       <span className='group-hover:text-blue-500'>
                         {post.comments_count}
-                      </span>
-                    </Button>
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      className='flex items-center gap-2 hover:text-green-500 hover:bg-green-500/10 transition-colors rounded-full group'
-                    >
-                      <Repeat2 className='h-4 w-4 transition-transform group-hover:scale-110' />
-                      <span className='group-hover:text-green-500'>
-                        {post.repost_count}
                       </span>
                     </Button>
                     <Button
@@ -214,7 +220,7 @@ const HomePage = () => {
           ))
         )}
       </div>
-    </HomeContainer>
+    </>
   );
 };
 

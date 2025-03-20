@@ -1,0 +1,7 @@
+{
+  "name": "wey_backend",
+  "scripts": {
+    "dev": "py manage.py runserver",
+    "postinstall": "py -m pip install -r requirements.txt && py manage.py migrate"
+  }
+}
