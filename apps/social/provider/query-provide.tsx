@@ -1,9 +1,13 @@
 'use client';
 
-import { QueryClient, QueryClientProvider, isServer } from '@tanstack/react-query';
-
+import {
+  QueryClient,
+  QueryClientProvider,
+  isServer,
+} from '@tanstack/react-query';
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 // 创建查询客户端
-function makeQueryClient():QueryClient {
+function makeQueryClient(): QueryClient {
   return new QueryClient({
     defaultOptions: {
       queries: {
@@ -41,5 +45,10 @@ export default function Providers({ children }: { children: React.ReactNode }) {
   //       因为 React 会在初始渲染期间抛出客户端，如果它暂停并且没有边界
   const queryClient = getQueryClient();
 
-  return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      {children}
+      <ReactQueryDevtools initialIsOpen={false} />
+    </QueryClientProvider>
+  );
 }

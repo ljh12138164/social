@@ -5,7 +5,7 @@
   "scripts": {
     "build": "turbo build",
     "dev": "turbo dev",
-    "dev:web": "turbo dev --filter=web",
+    "dev:social": "turbo dev --filter=social",
     "lint:all": "turbo lint",
     "lint": "biome check --fix --unsafe && biome lint .&& pnpm run lint:all"
   },

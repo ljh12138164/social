@@ -18,7 +18,8 @@ def me(request):
         'id': request.user.id,
         'name': request.user.name,
         'email': request.user.email,
-        'avatar': request.user.get_avatar()
+        'avatar': request.user.get_avatar(),
+        'bio': request.user.bio,
     })
 
 
@@ -87,20 +88,33 @@ def my_friendship_suggestions(request):
 @api_view(['POST'])
 def editprofile(request):
     user = request.user
-    email = request.data.get('email')
+    name = request.data.get('name')
+    bio = request.data.get('bio')
+    avatar = request.FILES.get('avatar')  # 从请求文件中获取头像
 
-    if User.objects.exclude(id=user.id).filter(email=email).exists():
-        return JsonResponse({'message': 'email already exists'})
-    else:
-        form = ProfileForm(request.POST, request.FILES, instance=user)
+    if not name:
+        return JsonResponse({'message': '用户名不能为空'})
 
-        if form.is_valid():
-            form.save()
-        
-        serializer = UserSerializer(user)
+    # 更新用户信息
+    user.name = name
+    if bio is not None:  # 允许清空bio
+        user.bio = bio
+    if avatar:
+        user.avatar = avatar
 
-        return JsonResponse({'message': 'information updated', 'user': serializer.data})
+    user.save()
     
+    return JsonResponse({
+        'message': '个人资料更新成功',
+        'user': {
+            'id': user.id,
+            'name': user.name,
+            'email': user.email,
+            'avatar': user.get_avatar(),
+            'bio': user.bio,
+        }
+    })
+
 
 @api_view(['POST'])
 def editpassword(request):
