@@ -51,9 +51,9 @@ export const ChatContainer = ({
   }
 
   return (
-    <div className='flex h-[calc(100vh-120px)]'>
+    <div className='flex h-[calc(100vh-120px)] rounded-lg shadow-sm overflow-hidden bg-white'>
       {/* 左侧会话列表 */}
-      <div className='w-[300px] border-r'>
+      <div className='w-[300px] border-r border-gray-100'>
         <ConversationList
           conversations={conversations || []}
           isLoading={isLoadingConversations}
@@ -63,7 +63,7 @@ export const ChatContainer = ({
       </div>
 
       {/* 右侧聊天区域 */}
-      <div className='flex-1 flex flex-col'>
+      <div className='flex-1 flex flex-col border-2 border-gray-100'>
         {activeConversation ? (
           <ChatBox
             conversation={activeConversation}
@@ -72,7 +72,24 @@ export const ChatContainer = ({
             isConnected={isConnected}
           />
         ) : (
-          <div className='flex-1 flex items-center justify-center text-gray-400'>
+          <div className='flex-1 flex items-center justify-center text-gray-400 flex-col'>
+            <div className='w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mb-3'>
+              <svg
+                xmlns='http://www.w3.org/2000/svg'
+                width='24'
+                height='24'
+                viewBox='0 0 24 24'
+                fill='none'
+                stroke='currentColor'
+                strokeWidth='2'
+                strokeLinecap='round'
+                strokeLinejoin='round'
+                className='text-gray-400'
+              >
+                <path d='M14 9a2 2 0 0 1-2 2H6l-4 4V4c0-1.1.9-2 2-2h8a2 2 0 0 1 2 2v5Z' />
+                <path d='M18 9h2a2 2 0 0 1 2 2v11l-4-4h-6a2 2 0 0 1-2-2v-1' />
+              </svg>
+            </div>
             选择一个会话开始聊天
           </div>
         )}

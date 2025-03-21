@@ -177,6 +177,19 @@ def handle_request(request, pk, status):
     request_user.save()
 
     notification = create_notification(request, 'accepted_friendrequest', friendrequest_id=friendship_request.id)
+    
+    # 当好友请求被接受时，自动创建会话
+    if status == FriendshipRequest.ACCEPTED:
+        from chat.models import Conversation
+        
+        # 检查是否已存在会话
+        existing_conversations = Conversation.objects.filter(users__in=list([request.user])).filter(users__in=list([user]))
+        
+        # 如果不存在会话则创建新会话
+        if not existing_conversations.exists():
+            conversation = Conversation.objects.create()
+            conversation.users.add(user, request.user)
+            conversation.save()
 
     return JsonResponse({'message': 'friendship request updated'})
 

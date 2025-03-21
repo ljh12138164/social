@@ -27,7 +27,7 @@ import { personalityLabels } from '@/lib/utils';
 import Image from 'next/image';
 import { PostItem } from '@/components/PostItem';
 
-// // 推文项组件
+// // 帖子项组件
 // const PostItem = ({ post }: { post: Post }) => {
 //   return (
 //     <Link href={`/post/${post.id}`}>
@@ -221,7 +221,7 @@ export const UserProfileContainer = () => {
             <span className='font-bold text-foreground'>
               {user.posts_count}
             </span>{' '}
-            推文
+            帖子
           </div>
           <div>
             <span className='font-bold text-foreground'>
@@ -407,7 +407,7 @@ export const UserProfileContainer = () => {
               value='posts'
               className='rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none py-3 px-4'
             >
-              推文
+              帖子
             </TabsTrigger>
             <TabsTrigger
               value='likes'
@@ -420,7 +420,7 @@ export const UserProfileContainer = () => {
           <TabsContent value='posts' className='mt-0'>
             {posts.length === 0 ? (
               <div className='py-10 text-center text-muted-foreground'>
-                还没有发布任何推文
+                还没有发布任何帖子
               </div>
             ) : (
               <div className='divide-y divide-border/40'>

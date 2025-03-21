@@ -1,9 +1,9 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   /* config options here */
   compress: true,
-  
 
   // 图片优化配置
   images: {
@@ -31,7 +31,6 @@ const nextConfig: NextConfig = {
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048],
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
   },
-
 
   // 实验性功能
   experimental: {

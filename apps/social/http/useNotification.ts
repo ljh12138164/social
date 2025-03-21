@@ -63,6 +63,6 @@ export const NOTIFICATION_TYPES = {
   new_friendrequest: '新的好友请求',
   accepted_friendrequest: '好友请求已接受',
   rejected_friendrequest: '好友请求被拒绝',
-  post_like: '推文被点赞',
-  post_comment: '推文有新评论',
+  post_like: '帖子被点赞',
+  post_comment: '帖子有新评论',
 };

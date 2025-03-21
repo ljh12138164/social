@@ -33,33 +33,39 @@ export const ConversationItem = ({
   return (
     <div
       className={cn(
-        'flex items-center p-3 cursor-pointer hover:bg-gray-50',
-        isActive && 'bg-blue-50 hover:bg-blue-50'
+        'flex items-center p-3 cursor-pointer hover:bg-gray-50 transition-colors duration-150',
+        isActive && 'bg-green-50 hover:bg-green-50 border-l-4 border-green-700'
       )}
       onClick={onClick}
     >
-      <Avatar className='h-10 w-10 mr-3'>
+      <Avatar className='h-12 w-12 mr-3 ring-2 ring-offset-2 ring-opacity-10 ring-gray-200'>
         <AvatarImage src={avatarUrl} />
-        <AvatarFallback>
+        <AvatarFallback className='bg-green-700 text-white'>
           {conversation.userName?.charAt(0) || '用户'}
         </AvatarFallback>
       </Avatar>
 
       <div className='flex-1 min-w-0'>
-        <div className='flex justify-between items-center'>
-          <span className='font-medium truncate'>{conversation.userName}</span>
+        <div className='flex justify-between items-center mb-1'>
+          <span
+            className={cn('font-medium truncate', isActive && 'text-green-700')}
+          >
+            {conversation.userName}
+          </span>
           {formattedTime && (
-            <span className='text-xs text-gray-500'>{formattedTime}</span>
+            <span className='text-xs text-gray-500 ml-1 whitespace-nowrap'>
+              {formattedTime}
+            </span>
           )}
         </div>
 
         <div className='flex items-center'>
-          <p className='text-sm text-gray-500 truncate mr-2'>
-            {conversation.lastMessage || '暂无消息'}
+          <p className='text-sm text-gray-500 truncate mr-2 max-w-[180px]'>
+            {conversation.lastMessage}
           </p>
           {conversation.unreadCount ? (
-            <span className='bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center'>
-              {conversation.unreadCount}
+            <span className='bg-red-500 text-white text-xs rounded-full min-w-5 h-5 flex items-center justify-center px-1.5'>
+              {conversation.unreadCount > 99 ? '99+' : conversation.unreadCount}
             </span>
           ) : null}
         </div>

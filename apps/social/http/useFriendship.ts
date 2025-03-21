@@ -61,6 +61,7 @@ export const useAcceptFriendRequest = () => {
     onSuccess: () => {
       // 刷新好友列表
       queryClient.invalidateQueries({ queryKey: ['friends'] });
+      queryClient.invalidateQueries({ queryKey: ['conversations'] });
       toast.success('已接受好友请求');
     },
     onError: (error: Error) => {

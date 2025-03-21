@@ -1,141 +1,85 @@
 'use client';
 
 import Emoji from '@/components/ChatEmoji';
+import { PostItem } from '@/components/PostItem';
+import Tiptap, { TiptapRef } from '@/components/Rich/Tiptap';
 import { Button } from '@/components/ui/button';
-import { Textarea } from '@/components/ui/textarea';
+// import { Textarea } from '@/components/ui/textarea';
 import { withAuth } from '@/container/auth-contanier/AuthContainer';
 import { UserAvatar } from '@/container/profile-contanier/UserAvatar';
 import { useProfile } from '@/http/useAuth';
-import { Post, useCreatePost, useLikePost, usePosts } from '@/http/usePost';
+import { useCreatePost } from '@/http/usePost';
+import { useSearchPostsPaginated } from '@/http/useSearch';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
-import {
-  Heart,
-  Image,
-  Loader2,
-  MessageSquare,
-  Share2,
-  Smile,
-} from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import { useState } from 'react';
-
-// 新建 PostItem 组件
-const PostItem = ({ post }: { post: Post }) => {
-  const { mutate: likePost, isPending: isLiking } = useLikePost(post.id);
-  const router = useRouter();
-
-  return (
-    <div
-      onClick={() => {
-        router.push(`/post/${post.id}`);
-      }}
-      className='p-4 hover:bg-accent/40 cursor-pointer transition-colors'
-    >
-      <div className='flex gap-4'>
-        <div className='w-10 h-10 rounded-full bg-muted shadow-sm overflow-hidden group'>
-          {post.created_by.get_avatar && (
-            <UserAvatar
-              src={post.created_by.get_avatar}
-              alt={post.created_by.name}
-              className='w-full h-full object-cover transition-transform group-hover:scale-110'
-            />
-          )}
-        </div>
-        <div className='flex-1 space-y-2'>
-          <div className='flex items-center gap-2'>
-            <span className='font-bold hover:underline cursor-pointer'>
-              {post.created_by.name}
-            </span>
-            <span className='text-muted-foreground hover:underline cursor-pointer'>
-              @{post.created_by.email}
-            </span>
-            <span className='text-muted-foreground'>·</span>
-            <span className='text-muted-foreground hover:underline cursor-pointer ml-auto'>
-              {format(new Date(post.created_at), 'PP', {
-                locale: zhCN,
-              })}
-            </span>
-          </div>
-          <p className='text-[15px] leading-normal'>{post.body}</p>
-          <div className='flex items-center justify-between max-w-md text-muted-foreground'>
-            <Button
-              variant='ghost'
-              size='sm'
-              className='flex items-center gap-2 hover:text-blue-500 hover:bg-blue-500/10 transition-colors rounded-full -ml-2 group'
-              onClick={(e) => {
-                e.stopPropagation();
-                router.push(`/post/${post.id}`);
-              }}
-            >
-              <MessageSquare className='h-4 w-4 transition-transform group-hover:scale-110' />
-              <span className='group-hover:text-blue-500'>
-                {post.comments_count}
-              </span>
-            </Button>
-            <Button
-              variant='ghost'
-              size='sm'
-              className={cn(
-                'flex items-center gap-2 hover:text-pink-500 hover:bg-pink-500/10 transition-colors rounded-full group',
-                post.is_liked && 'text-pink-500'
-              )}
-              onClick={(e) => {
-                e.stopPropagation();
-                likePost();
-              }}
-              disabled={isLiking}
-            >
-              <Heart
-                className={cn(
-                  'h-4 w-4 transition-transform group-hover:scale-110',
-                  isLiking && 'animate-pulse',
-                  post.is_liked && 'fill-current'
-                )}
-              />
-              <span
-                className={cn(
-                  'group-hover:text-pink-500',
-                  post.is_liked && 'text-pink-500'
-                )}
-              >
-                {post.likes_count}
-              </span>
-            </Button>
-            <Button
-              variant='ghost'
-              size='sm'
-              className='flex items-center gap-2 hover:text-blue-500 hover:bg-blue-500/10 transition-colors rounded-full group'
-              onClick={(e) => e.stopPropagation()}
-            >
-              <Share2 className='h-4 w-4 transition-transform group-hover:scale-110' />
-            </Button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+import { useQueryClient } from '@tanstack/react-query';
+import { Image, Loader2, Smile } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 
 const HomePage = () => {
   const [newPost, setNewPost] = useState('');
-  const [activeTab, setActiveTab] = useState<'recommend' | 'following'>(
-    'recommend'
-  );
-  const { data: posts, isLoading } = usePosts();
+  const editorRef = useRef<TiptapRef | null>(null);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
+
+  // const { data: posts, isLoading } = useSearch('');
   const createPost = useCreatePost();
   const { data: profile } = useProfile();
+  const queryClient = useQueryClient();
+  const {
+    data: posts,
+    isLoading,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useSearchPostsPaginated('');
+
+  // 设置 IntersectionObserver 监听底部元素
+  useEffect(() => {
+    const loadMoreCallback = (entries: IntersectionObserverEntry[]) => {
+      const [entry] = entries;
+      if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+        fetchNextPage();
+      }
+    };
+
+    if (loadMoreRef.current) {
+      observerRef.current = new IntersectionObserver(loadMoreCallback, {
+        root: null, // 使用视口作为根
+        rootMargin: '0px',
+        threshold: 0.1, // 当 10% 的目标元素可见时触发回调
+      });
+
+      observerRef.current.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
+
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
     createPost.mutate(
       { body: newPost },
       {
-        onSuccess: () => {
+        onSuccess: (data) => {
           setNewPost('');
+          queryClient.invalidateQueries({
+            queryKey: ['search_posts_paginated', ''],
+          });
+          if (editorRef.current && editorRef.current.editor) {
+            editorRef.current.editor.commands.clearContent();
+          }
         },
       }
     );
+  };
+
+  // 处理编辑器内容更新
+  const handleEditorUpdate = (content: string) => {
+    setNewPost(content);
   };
 
   return (
@@ -156,13 +100,7 @@ const HomePage = () => {
             size='md'
           />
           <div className='flex-1'>
-            <Textarea
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-              placeholder='有什么新鲜事想分享给大家？'
-              className='w-full p-2 text-xl resize-none focus:outline-none bg-transparent placeholder:text-muted-foreground/70'
-              rows={3}
-            />
+            <Tiptap ref={editorRef} onContentUpdate={handleEditorUpdate} />
             <div className='flex items-center justify-between mt-4 pt-4 border-t border-border/40'>
               <div className='flex gap-2'>
                 <Button
@@ -174,7 +112,10 @@ const HomePage = () => {
                 </Button>
                 <Emoji
                   onClick={(e) => {
-                    setNewPost(newPost + e.native);
+                    // 将表情插入到编辑器
+                    if (editorRef.current && editorRef.current.editor) {
+                      editorRef.current.editor.commands.insertContent(e.native);
+                    }
                   }}
                 >
                   <Button
@@ -206,15 +147,29 @@ const HomePage = () => {
         </div>
       </div>
 
-      {/* 推文列表 */}
+      {/* 帖子列表 */}
       <div className='divide-y divide-border/40'>
         {isLoading ? (
           <div className='flex justify-center items-center py-8'>
             <Loader2 className='h-8 w-8 animate-spin text-primary' />
           </div>
         ) : (
-          posts?.map((post) => <PostItem key={post.id} post={post} />)
+          posts?.pages.map((page) =>
+            page.results.map((post) => <PostItem key={post.id} post={post} />)
+          )
         )}
+
+        {/* 加载更多指示器 */}
+        <div ref={loadMoreRef} className='w-full py-4'>
+          {isFetchingNextPage && (
+            <div className='flex justify-center items-center py-4'>
+              <Loader2 className='h-6 w-6 animate-spin text-primary' />
+            </div>
+          )}
+        </div>
+        <div className='flex justify-center items-center py-4'>
+          {hasNextPage ? '加载更多' : '没有更多了'}
+        </div>
       </div>
     </>
   );

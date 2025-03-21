@@ -1,5 +1,6 @@
 'use client';
 
+import Render from '@/components/Rich/Render';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { withAuth } from '@/container/auth-contanier/AuthContainer';
@@ -112,7 +113,7 @@ const PostPage = () => {
   if (!data?.post) {
     return (
       <div className='flex flex-col items-center justify-center min-h-screen gap-4'>
-        <h1 className='text-2xl font-bold'>推文不存在</h1>
+        <h1 className='text-2xl font-bold'>帖子不存在</h1>
         <Button onClick={() => router.push('/')}>返回首页</Button>
       </div>
     );
@@ -145,11 +146,11 @@ const PostPage = () => {
           >
             <ArrowLeft className='h-5 w-5' />
           </Button>
-          <h1 className='text-xl font-bold'>推文</h1>
+          <h1 className='text-xl font-bold'>帖子</h1>
         </div>
       </div>
 
-      {/* 推文内容 */}
+      {/* 帖子内容 */}
       <div className='p-4 border-b border-border/40'>
         <div className='flex items-start gap-4'>
           <UserAvatar
@@ -166,9 +167,9 @@ const PostPage = () => {
                 @{post.created_by.email}
               </span>
             </div>
-            <p className='mt-4 text-xl leading-normal whitespace-pre-wrap'>
-              {post.body}
-            </p>
+            <div className='mt-4 text-xl leading-normal whitespace-pre-wrap'>
+              <Render data={post.body} />
+            </div>
             {post.attachments.length > 0 && (
               <div className='mt-4 grid grid-cols-2 gap-2'>
                 {post.attachments.map((attachment) => (

@@ -19,7 +19,7 @@ export const HomeContainer = ({ children }: HomeContainerProps) => {
       {!isAuth && <TopNavbar />}
       <div className='flex flex-1 pt-14'>
         <ScrollArea className='flex-1 h-[calc(100vh-3.5rem)]'>
-          <div className='max-w-5xl mx-auto pt-2'>{children}</div>
+          <div className=' mx-auto pt-2'>{children}</div>
         </ScrollArea>
         <RightSidebar />
       </div>

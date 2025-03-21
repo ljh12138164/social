@@ -1,15 +1,17 @@
 'use client';
 
 import { UserAvatar } from '@/container/profile-contanier/UserAvatar';
-import { Post } from '@/http/usePost';
+import { Post, useLikePost } from '@/http/usePost';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { Heart, Loader2, MessageSquare, Share2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { Button } from './ui/button';
+import Render from './Rich/Render';
 
 export const PostItem = ({ post }: { post: Post }) => {
+  const { mutate: likePost } = useLikePost(post.id);
   const router = useRouter();
 
   return (
@@ -44,7 +46,9 @@ export const PostItem = ({ post }: { post: Post }) => {
               })}
             </span>
           </div>
-          <p className='text-[15px] leading-normal'>{post.body}</p>
+          <div className='text-[15px] leading-normal'>
+            <Render data={post.body} />
+          </div>
           {post.attachments && post.attachments.length > 0 && (
             <div className='mt-2 grid grid-cols-2 gap-2'>
               {post.attachments.map((attachment) => (
@@ -79,6 +83,7 @@ export const PostItem = ({ post }: { post: Post }) => {
               )}
               onClick={(e) => {
                 e.stopPropagation();
+                likePost();
               }}
             >
               <Heart

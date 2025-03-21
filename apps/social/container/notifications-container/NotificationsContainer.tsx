@@ -1,24 +1,21 @@
 'use client';
 
 import {
-  useNotifications,
-  useReadNotification,
   NOTIFICATION_TYPES,
   Notification,
+  useNotifications,
+  useReadNotification,
 } from '@/http/useNotification';
-import { format } from 'date-fns';
-import { zhCN } from 'date-fns/locale';
 import {
+  AlertTriangle,
   Bell,
+  Heart,
   Loader2,
   MessageSquare,
-  Heart,
-  UserPlus,
   UserCheck,
-  AlertTriangle,
+  UserPlus,
 } from 'lucide-react';
 import Link from 'next/link';
-import { useEffect } from 'react';
 
 // 通知图标组件
 const NotificationIcon = ({
@@ -78,7 +75,7 @@ const NotificationItem = ({ notification }: { notification: Notification }) => {
             <p className='text-sm text-foreground'>{notification.body}</p>
             <p className='text-xs text-muted-foreground mt-1'>
               {NOTIFICATION_TYPES[notification.type_of_notification]} ·{' '}
-              {format(new Date(), 'PPp', { locale: zhCN })}
+              {/* {format(new Date(), 'PPp', { locale: zhCN })} */}
             </p>
           </div>
         </div>

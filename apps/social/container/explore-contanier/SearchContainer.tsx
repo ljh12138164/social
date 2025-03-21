@@ -1,18 +1,17 @@
 'use client';
 
-import { UserAvatar } from '@/container/profile-contanier/UserAvatar';
-import { Button } from '@/components/ui/button';
+import Render from '@/components/Rich/Render';
+import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useSearch } from '@/http/useSearch';
+import { UserAvatar } from '@/container/profile-contanier/UserAvatar';
 import { Post } from '@/http/usePost';
-import { Search, Loader2, User as UserIcon } from 'lucide-react';
-import { useState } from 'react';
-import { debounce } from 'lodash-es';
+import { useSearch } from '@/http/useSearch';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import { debounce } from 'lodash-es';
+import { Loader2, Search, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
-import { Card } from '@/components/ui/card';
-
+import { useState } from 'react';
 // 用户卡片组件
 const UserCard = ({ user }: { user: any }) => {
   return (
@@ -37,7 +36,7 @@ const UserCard = ({ user }: { user: any }) => {
   );
 };
 
-// 推文卡片组件
+// 帖子卡片组件
 const PostCard = ({ post }: { post: Post }) => {
   return (
     <Link href={`/post/${post.id}`} className='block'>
@@ -58,7 +57,9 @@ const PostCard = ({ post }: { post: Post }) => {
                 {format(new Date(post.created_at), 'PP', { locale: zhCN })}
               </span>
             </div>
-            <p className='mt-2 line-clamp-3'>{post.body}</p>
+            <div className='mt-2 line-clamp-3'>
+              <Render data={post.body} />
+            </div>
           </div>
         </div>
       </Card>
@@ -77,7 +78,7 @@ export const SearchContainer = () => {
     }
   };
 
-  // 搜索用户或推文
+  // 搜索用户或帖子
   const handleChange = debounce(
     (e: React.ChangeEvent<HTMLInputElement>) => {
       setQuery(e.target.value);
@@ -87,11 +88,11 @@ export const SearchContainer = () => {
   );
 
   return (
-    <div className='py-4 max-w-5xl mx-auto'>
+    <div className='py-4 mx-auto'>
       <div className='flex gap-2 px-4 mb-6'>
         <div className='relative flex-1'>
           <Input
-            placeholder='搜索用户或推文...'
+            placeholder='搜索用户或帖子...'
             onChange={handleChange}
             onKeyDown={handleKeyDown}
             className='pl-10 py-6'
@@ -155,7 +156,7 @@ export const SearchContainer = () => {
                       <path d='M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z' />
                       <path d='M10 2c1 .5 2 2 2 5' />
                     </svg>
-                    <h2 className='font-bold text-lg'>推文</h2>
+                    <h2 className='font-bold text-lg'>帖子</h2>
                   </div>
                   <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
                     {results.posts.map((post) => (

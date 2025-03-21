@@ -44,7 +44,7 @@ export const ProfileContainer = () => {
   return (
     <div className='min-h-screen'>
       {/* 封面图 */}
-      <div className='h-48 bg-gradient-to-r from-blue-400 to-blue-600 relative'>
+      <div className='h-48 bg-gradient-to-r  from-blue-400 to-blue-600 relative'>
         <div className='absolute -bottom-16 left-4 sm:left-8'>
           <UserAvatar src={profile.avatar} alt={profile.name} size='lg' />
         </div>
@@ -257,7 +257,7 @@ export const ProfileContainer = () => {
           </Card>
         )}
       </div>
-      {/* 推文和我的点赞 */}
+      {/* 帖子和我的点赞 */}
       <div className='mt-8 px-4 sm:px-8'>
         <Tabs
           defaultValue='posts'
@@ -269,7 +269,7 @@ export const ProfileContainer = () => {
               value='posts'
               className='rounded-none data-[state=active]:border-b-2 data-[state=active]:border-primary data-[state=active]:shadow-none py-3 px-4'
             >
-              推文
+              帖子
             </TabsTrigger>
             <TabsTrigger
               value='likes'
@@ -293,7 +293,7 @@ export const ProfileContainer = () => {
                 ))
               ) : (
                 <div className='py-12 text-center text-muted-foreground'>
-                  <p>暂无推文</p>
+                  <p>暂无帖子</p>
                 </div>
               )}
             </div>

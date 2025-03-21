@@ -7,6 +7,8 @@ import sys
 from datetime import timedelta
 from collections import Counter
 from django.utils import timezone
+from bs4 import BeautifulSoup
+import re
 
 
 sys.path.append(os.path.join(os.path.abspath(os.path.dirname(__file__)), '..'))
@@ -17,9 +19,19 @@ django.setup()
 from post.models import Post, Trend
 
 def extract_hashtags(text, trends):
-    for word in text.split():
-        if word[0] == '#':
-            trends.append(word[1:])
+    # 首先检查文本是否包含HTML标签
+    if '<' in text and '>' in text:
+        # 使用BeautifulSoup解析HTML
+        soup = BeautifulSoup(text, 'html.parser')
+        # 获取所有文本内容，忽略HTML标签
+        text = soup.get_text(' ', strip=True)
+    
+    # 使用正则表达式匹配标签
+    hashtag_pattern = r'#([\w\d\u4e00-\u9fa5]+)'
+    matches = re.findall(hashtag_pattern, text)
+    
+    for match in matches:
+        trends.append(match)
     
     return trends
 

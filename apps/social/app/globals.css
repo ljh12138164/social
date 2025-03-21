@@ -64,19 +64,20 @@
 }
 
 
+
 @layer base {
   :root {
     --background: hsl(0 0% 100%);
-    --foreground: hsl(240 10% 3.9%);
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(240 10% 3.9%);
+    --foreground:  hsl(240 10% 3.9%);
+    --card:  hsl(0 0% 100%);
+    --card-foreground:hsl(240 10% 3.9%);
     --popover: hsl(0 0% 100%);
     --popover-foreground: hsl(240 10% 3.9%);
-      --primary: hsl(240 5.9% 10%);
-    --primary-foreground: hsl(0 0% 98%);
+    --primary: hsl(142, 79%, 31%);
+    --primary-foreground: hsl(355.7 100% 97.3%);
     --secondary: hsl(240 4.8% 95.9%);
     --secondary-foreground: hsl(240 5.9% 10%);
-    --muted: hsl(240 4.8% 95.9%);
+    --muted: hsl(240 4.8% 95.9%);  
     --muted-foreground: hsl(240 3.8% 46.1%);
     --accent: hsl(240 4.8% 95.9%);
     --accent-foreground: hsl(240 5.9% 10%);
@@ -84,40 +85,40 @@
     --destructive-foreground: hsl(0 0% 98%);
     --border: hsl(240 5.9% 90%);
     --input: hsl(240 5.9% 90%);
-    --ring: hsl(240 5.9% 10%);
-    --radius:   0.5rem;
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --ring: hsl(142.1 76.2% 36.3%);
+    --radius:  0.5rem;
+    --chart-1:  hsl(12 76% 61%);
+    --chart-2:  hsl(173 58% 39%);
+    --chart-3:  hsl(197 37% 24%);
+    --chart-4:  hsl(43 74% 66%);
+    --chart-5:  hsl(27 87% 67%);
   }
 
   .dark {
-    --background: hsl(240 10% 3.9%);
-    --foreground: hsl(0 0% 98%);
-    --card: hsl(240 10% 3.9%);
-    --card-foreground: hsl(0 0% 98%);
-    --popover: hsl(240 10% 3.9%);
-    --popover-foreground: hsl(0 0% 98%);
-    --primary: hsl(0 0% 98%);
-    --primary-foreground: 240 5.9% 10%;
+    --background: hsl(20 14.3% 4.1%);
+    --foreground: hsl(0 0% 95%);
+    --card: hsl(24 9.8% 10%);
+    --card-foreground: hsl(0 0% 95%);
+    --popover: hsl(0 0% 9%);
+    --popover-foreground: hsl(0 0% 95%);
+    --primary: hsl(142.1 70.6% 45.3%);
+    --primary-foreground: hsl(144.9 80.4% 10%);
     --secondary: hsl(240 3.7% 15.9%);
-      --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(240 3.7% 15.9%);
+    --secondary-foreground: hsl(0 0% 98%);
+    --muted: hsl(0 0% 15%);
     --muted-foreground: hsl(240 5% 64.9%);
-    --accent: hsl(240 3.7% 15.9%);
+    --accent: hsl(12 6.5% 15.1%);
     --accent-foreground: hsl(0 0% 98%);
     --destructive: hsl(0 62.8% 30.6%);
-    --destructive-foreground: hsl(0 0% 98%);
+    --destructive-foreground: hsl(0 85.7% 97.3%);
     --border: hsl(240 3.7% 15.9%);
     --input: hsl(240 3.7% 15.9%);
-    --ring: hsl(240 4.9% 83.9%);
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
+    --ring: hsl(142.4 71.8% 29.2%);
+    --chart-1: hsl(220 70% 50%);
+    --chart-2: hsl(160 60% 45%);
+    --chart-3: hsl(30 80% 55%);
+    --chart-4: hsl(280 65% 60%);
+    --chart-5: hsl(340 75% 55%)   ;
   }
 }
 
@@ -129,4 +130,113 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+/* Basic editor styles */
+.tiptap {
+  :first-child {
+    margin-top: 0;
+  }
+
+  /* List styles */
+  ul,
+  ol {
+    padding: 0 1rem;
+    margin: 1.25rem 1rem 1.25rem 0.4rem;
+
+    li p {
+      margin-top: 0.25em;
+      margin-bottom: 0.25em;
+    }
+  }
+
+  /* Heading styles */
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    line-height: 1.1;
+    margin-top: 2.5rem;
+    text-wrap: pretty;
+  }
+
+  h1,
+  h2 {
+    margin-top: 3.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.4rem;
+  }
+
+  h2 {
+    font-size: 1.2rem;
+  }
+
+  h3 {
+    font-size: 1.1rem;
+  }
+
+  h4,
+  h5,
+  h6 {
+    font-size: 1rem;
+  }
+
+  /* Code and preformatted text styles */
+  code {
+    background-color: var(--purple-light);
+    border-radius: 0.4rem;
+    color: var(--black);
+    font-size: 0.85rem;
+    padding: 0.25em 0.3em;
+  }
+
+  pre {
+    background: var(--black);
+    border-radius: 0.5rem;
+    color: var(--white);
+    font-family: 'JetBrainsMono', monospace;
+    margin: 1.5rem 0;
+    padding: 0.75rem 1rem;
+
+    code {
+      background: none;
+      color: inherit;
+      font-size: 0.8rem;
+      padding: 0;
+    }
+  }
+
+  blockquote {
+    border-left: 3px solid var(--gray-3);
+    margin: 1.5rem 0;
+    padding-left: 1rem;
+  }
+
+  hr {
+    border: none;
+    border-top: 1px solid var(--gray-2);
+    margin: 2rem 0;
+  }
+
+  /* Placeholder (at the top) */
+  p.is-editor-empty:first-child::before {
+    color: var(--gray-4);
+    content: attr(data-placeholder);
+    float: left;
+    height: 0;
+    pointer-events: none;
+  }
+
+  /* Placeholder (on every new line) */
+  /* .is-empty::before {
+      color: var(--gray-4);
+      content: attr(data-placeholder);
+      float: left;
+      height: 0;
+      pointer-events: none;
+    } */
 }

@@ -98,7 +98,7 @@ export const MessageInput = ({
   }, []);
 
   return (
-    <div className='p-3 border-t'>
+    <div className='p-4 border-t bg-white'>
       <div className='flex items-end gap-2'>
         <div className='relative flex-1'>
           <Textarea
@@ -108,15 +108,15 @@ export const MessageInput = ({
             onKeyDown={handleKeyDown}
             placeholder='输入消息...'
             disabled={disabled}
-            className='min-h-[60px] max-h-[150px] pr-10 resize-none'
+            className='min-h-[60px] max-h-[150px] pr-10 resize-none rounded-xl border-gray-200 focus:border-green-300 focus:ring focus:ring-green-200 focus:ring-opacity-50 transition-all'
           />
-          <div className='absolute right-2 bottom-2'>
+          <div className='absolute right-3 bottom-3'>
             <ChatEmoji onClick={handleEmojiSelect}>
               <Button
                 type='button'
                 size='icon'
                 variant='ghost'
-                className='h-8 w-8'
+                className='h-8 w-8 rounded-full hover:bg-gray-100'
               >
                 <Smile className='h-5 w-5 text-gray-500' />
               </Button>
@@ -126,7 +126,7 @@ export const MessageInput = ({
         <Button
           onClick={handleSend}
           disabled={!message.trim() || disabled}
-          className='h-10'
+          className='h-10 bg-green-500 hover:bg-green-600 transition-colors px-4 rounded-xl'
           aria-label='发送消息'
         >
           <Send className='h-4 w-4 mr-2' />
