@@ -18,6 +18,8 @@ class Comment(models.Model):
     body = models.TextField(blank=True, null=True)
     created_by = models.ForeignKey(User, related_name='comments', on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
+    likes = models.ManyToManyField(Like, blank=True)
+    likes_count = models.IntegerField(default=0)
 
     class Meta:
         ordering = ('created_at',)

@@ -31,14 +31,13 @@ export const AuthContainer = ({
     const checkAuth = () => {
       const token = localStorage.getItem('access_token');
       const isPublicPath = PUBLIC_PATHS.includes(pathname);
-
-      if (!token && requireAuth && !isPublicPath) {
+      if ((!token || token === 'undefined') && requireAuth && !isPublicPath) {
         toast.error('请先登录');
         // 需要登录但未登录，重定向到登录页
         router.push(`/auth?redirect=${encodeURIComponent(pathname)}`);
       } else if (token && isPublicPath) {
         // 已登录但访问登录页等公开页面，重定向到首页
-        router.push('/');
+        router.push('/home');
       }
     };
 

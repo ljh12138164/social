@@ -4,7 +4,7 @@
   "description": "",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "bun run src/index.ts",
+    "dev": "bun run src/index.ts --hot",
     "lint": "tsc --noEmit && biome check --fix --unsafe --no-errors-on-unmatched   && biome check --write --no-errors-on-unmatched && biome check --write --organize-imports-enabled=false --no-errors-on-unmatched && biome check --write --unsafe --no-errors-on-unmatched && biome check --files-ignore-unknown=true&& biome lint --write --no-errors-on-unmatched"
   },
   "keywords": [],

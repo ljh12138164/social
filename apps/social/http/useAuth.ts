@@ -3,7 +3,7 @@ import { post, get } from '@/lib/http';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-interface TokenResponse {
+export interface TokenResponse {
   access: string;
   refresh: string;
 }
@@ -60,7 +60,7 @@ export const useLogin = () => {
       // 保存令牌
       saveTokens(data);
       // 显示成功提示
-      toast.success('登录成功')
+      toast.success('登录成功');
       // 跳转到首页
       router.push('/home');
     },
@@ -76,25 +76,23 @@ export const useLogin = () => {
  * @returns 注册 mutation 函数和状态
  */
 export const useSignup = () => {
-  const router = useRouter();
-
   return useMutation({
     mutationFn: async (credentials: SignupCredentials) => {
-      const response = await post<TokenResponse>('/signup/', credentials);
+      const response = await post<{ token: TokenResponse }>(
+        '/signup/',
+        credentials
+      );
       return response;
     },
-    onSuccess: (data) => {
-      // 保存令牌
-      saveTokens(data);
-      // 显示成功提示
-      toast.success('注册成功');
-      // 跳转到首页
-      router.push('/home');
-    },
+
     onError: (error: any) => {
       // 显示错误提示
-      const errorMessage = error.response?.data?.detail || 
-          (error.response?.data && Object.values(error.response?.data as Record<string, string[]>)[0]?.[0]) || 
+      const errorMessage =
+        error.response?.data?.detail ||
+        (error.response?.data &&
+          Object.values(
+            error.response?.data as Record<string, string[]>
+          )[0]?.[0]) ||
         '注册失败，请稍后重试';
       toast.error(errorMessage);
     },
@@ -127,7 +125,12 @@ export const useLogout = () => {
  * @returns 认证状态
  */
 export const useAuthCheck = () => {
-  const isAuthenticated = typeof window !== 'undefined' && !!localStorage.getItem('access_token');
+  const isAuthenticated =
+    typeof window !== 'undefined' &&
+    (!!localStorage.getItem('access_token') ||
+      localStorage.getItem('access_token') === 'undefined') &&
+    !!localStorage.getItem('refresh_token') &&
+    localStorage.getItem('refresh_token') !== 'undefined';
   return { isAuthenticated };
 };
 

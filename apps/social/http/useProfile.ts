@@ -1,5 +1,7 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { get, post } from '@/lib/http';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { Post } from './usePost';
+import toast from 'react-hot-toast';
 
 export interface Profile {
   id: number;
@@ -62,6 +64,58 @@ export const useUpdateProfile = () => {
       // 处理错误情况
       const message = error.response?.data?.message || '更新个人资料失败';
       throw new Error(message);
+    },
+  });
+};
+
+interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  get_avatar: string;
+  bio: string;
+  friends_count: number;
+  posts_count: number;
+  can_send_friendship_request: boolean;
+}
+
+/**
+ * ### 获取用户资料
+ */
+export const useUserProfile = (userId: string) => {
+  return useQuery<{
+    user: UserProfile;
+    posts: Post[];
+    can_send_friendship_request: boolean;
+    is_friend: boolean;
+  }>({
+    queryKey: ['userProfile', userId],
+    queryFn: async () => {
+      const response = await get<{
+        user: UserProfile;
+        posts: Post[];
+        can_send_friendship_request: boolean;
+        is_friend: boolean;
+      }>(`/posts/profile/${userId}/`);
+      return response;
+    },
+    enabled: !!userId,
+  });
+};
+
+/**
+ * ### 发送好友请求
+ */
+export const useSendFriendRequest = (userId: string) => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      const response = await post(`/friends/${userId}/request/`);
+      return response;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['userProfile', userId] });
+      toast.success('发送好友请求成功');
     },
   });
 };

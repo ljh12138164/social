@@ -1,5 +1,10 @@
 'use client';
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import axios, {
+  AxiosInstance,
+  AxiosRequestConfig,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from 'axios';
 import { toast } from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 
@@ -41,10 +46,12 @@ const refreshToken = async () => {
       throw new Error('No refresh token');
     }
 
-    const response = await axios.post<{ access_token: string; refresh_token: string }>(
-      `${process.env.NEXT_PUBLIC_API_URL}/refresh`,
-      { refresh: refresh_token }
-    );
+    const response = await axios.post<{
+      access_token: string;
+      refresh_token: string;
+    }>(`${process.env.NEXT_PUBLIC_API_URL}/refresh`, {
+      refresh: refresh_token,
+    });
 
     const { access_token, refresh_token: new_refresh_token } = response.data;
     localStorage.setItem('access_token', access_token);
@@ -63,7 +70,10 @@ const refreshToken = async () => {
 http.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
     // 从 localStorage 获取 token
-    const token = typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
+    const token =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('access_token')
+        : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -80,6 +90,7 @@ http.interceptors.response.use(
     return response.data;
   },
   async (error) => {
+    const router = useRouter();
     const originalRequest = error.config;
 
     // 如果是401错误且不是刷新token的请求
@@ -116,50 +127,73 @@ http.interceptors.response.use(
     // 处理其他错误响应
     if (error.response) {
       switch (error.response.status) {
+        case 400:
+          // 请求参数错误
+          toast.error('请求参数错误');
+          break;
+        case 401:
+          // 未授权
+          toast.error('未授权');
+          router.push('/auth');
+          break;
         case 403:
           // 权限不足
-          toast('没有权限访问该资源');
+          toast.error('没有权限访问该资源');
           break;
         case 404:
           // 资源不存在
-          toast('请求的资源不存在');
+          toast.error('请求的资源不存在');
           break;
         case 500:
           // 服务器错误
-          toast('服务器错误');
+          toast.error('服务器错误');
           break;
         default:
-          toast('发生错误:', error.response.data);
+          toast.error('发生错误:', error.response.data);
       }
     } else if (error.request) {
       // 请求已发出但没有收到响应
-      toast('网络错误，请检查网络连接');
+      toast.error('网络错误，请检查网络连接');
     } else {
       // 请求配置出错
-      toast('请求配置错误:', error.message);
+      toast.error('请求配置错误:', error.message);
     }
     return Promise.reject(error);
   }
 );
 
 // 封装 GET 请求
-export const get = <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> => {
+export const get = <T = any>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<T> => {
   return http.get(url, config);
 };
 
 // 封装 POST 请求
-export const post = <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
+export const post = <T = any>(
+  url: string,
+  data?: any,
+  config?: AxiosRequestConfig
+): Promise<T> => {
   return http.post(url, data, config);
 };
 
 // 封装 PUT 请求
-export const put = <T = any>(url: string, data?: any, config?: AxiosRequestConfig): Promise<T> => {
+export const put = <T = any>(
+  url: string,
+  data?: any,
+  config?: AxiosRequestConfig
+): Promise<T> => {
   return http.put(url, data, config);
 };
 
 // 封装 DELETE 请求
-export const del = <T = any>(url: string, config?: AxiosRequestConfig): Promise<T> => {
+export const del = <T = any>(
+  url: string,
+  config?: AxiosRequestConfig
+): Promise<T> => {
   return http.delete(url, config);
 };
 
-export default http; 
+export default http;

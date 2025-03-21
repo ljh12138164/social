@@ -12,31 +12,37 @@ const navItems = [
     label: '首页',
     icon: Home,
     href: '/home',
+    active: ['/home', '/post'],
   },
   {
     label: '好友',
     icon: User,
     href: '/friends',
+    active: ['/friends'],
   },
   {
     label: '探索',
     icon: Search,
     href: '/explore',
+    active: ['/explore'],
   },
   {
     label: '通知',
     icon: Bell,
     href: '/notifications',
+    active: ['/notifications'],
   },
   {
     label: '消息',
     icon: Mail,
     href: '/messages',
+    active: ['/messages'],
   },
   {
     label: '个人资料',
     icon: User,
     href: '/profile',
+    active: ['/profile'],
   },
 ];
 
@@ -65,7 +71,9 @@ export const NavSidebar = () => {
         {/* 导航菜单 */}
         <nav className='flex-1 space-y-1'>
           {navItems.map((item) => {
-            const isActive = pathname.startsWith(item.href);
+            const isActive = item.active.some((active) =>
+              pathname.startsWith(active)
+            );
             const Icon = item.icon;
 
             return (

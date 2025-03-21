@@ -1,5 +1,4 @@
 'use client';
-
 import { useState, useEffect } from 'react';
 import { LoginForm } from '@/container/auth-contanier/LoginForm';
 import { SignupForm } from '@/container/auth-contanier/SignupForm';
@@ -85,7 +84,19 @@ export default function AuthPage() {
           </div>
 
           {/* 表单区域 */}
-          <div className='px-6'>{isLogin ? <LoginForm /> : <SignupForm />}</div>
+          <div className='px-6'>
+            {isLogin ? (
+              <LoginForm />
+            ) : (
+              <SignupForm
+                onSuccess={(data) => {
+                  setIsLogin(true);
+                  localStorage.setItem('access_token', data.access);
+                  localStorage.setItem('refresh_token', data.refresh);
+                }}
+              />
+            )}
+          </div>
 
           {/* 底部切换提示 */}
           <div className='px-6 pb-6 text-center'>

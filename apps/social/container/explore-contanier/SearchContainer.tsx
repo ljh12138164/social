@@ -1,0 +1,178 @@
+'use client';
+
+import { UserAvatar } from '@/container/profile-contanier/UserAvatar';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { useSearch } from '@/http/useSearch';
+import { Post } from '@/http/usePost';
+import { Search, Loader2, User as UserIcon } from 'lucide-react';
+import { useState } from 'react';
+import { debounce } from 'lodash-es';
+import { format } from 'date-fns';
+import { zhCN } from 'date-fns/locale';
+import Link from 'next/link';
+import { Card } from '@/components/ui/card';
+
+// 用户卡片组件
+const UserCard = ({ user }: { user: any }) => {
+  return (
+    <Link href={`/profile/${user.id}`} className='block'>
+      <Card className='p-4 hover:bg-muted/50 transition-colors rounded-lg min-h-[90px]'>
+        <div className='flex items-center gap-3'>
+          <UserAvatar src={user.get_avatar} alt={user.name} size='md' />
+          <div>
+            <h3 className='font-bold whitespace-nowrap text-ellipsis overflow-hidden'>
+              {user.name}
+            </h3>
+            <p className='text-sm text-muted-foreground'>{user.email}</p>
+            {user.bio && (
+              <p className='mt-1 text-sm line-clamp-2 text-ellipsis overflow-hidden whitespace-nowrap'>
+                {user.bio}
+              </p>
+            )}
+          </div>
+        </div>
+      </Card>
+    </Link>
+  );
+};
+
+// 推文卡片组件
+const PostCard = ({ post }: { post: Post }) => {
+  return (
+    <Link href={`/post/${post.id}`} className='block'>
+      <Card className='p-4 hover:bg-muted/50 transition-colors rounded-lg min-h-[90px]'>
+        <div className='flex gap-3'>
+          <UserAvatar
+            src={post.created_by.get_avatar}
+            alt={post.created_by.name}
+            size='sm'
+          />
+          <div className='flex-1'>
+            <div className='flex items-center gap-2'>
+              <span className='font-bold whitespace-nowrap text-ellipsis overflow-hidden'>
+                {post.created_by.name}
+              </span>
+              <span className='text-muted-foreground'>·</span>
+              <span className='text-muted-foreground whitespace-nowrap text-ellipsis overflow-hidden'>
+                {format(new Date(post.created_at), 'PP', { locale: zhCN })}
+              </span>
+            </div>
+            <p className='mt-2 line-clamp-3'>{post.body}</p>
+          </div>
+        </div>
+      </Card>
+    </Link>
+  );
+};
+
+// 搜索容器组件
+export const SearchContainer = () => {
+  const [query, setQuery] = useState('');
+  const { data: results, isPending, isSuccess } = useSearch(query);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setQuery(e.currentTarget.value);
+    }
+  };
+
+  // 搜索用户或推文
+  const handleChange = debounce(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setQuery(e.target.value);
+    },
+    500,
+    { maxWait: 500 }
+  );
+
+  return (
+    <div className='py-4 max-w-5xl mx-auto'>
+      <div className='flex gap-2 px-4 mb-6'>
+        <div className='relative flex-1'>
+          <Input
+            placeholder='搜索用户或推文...'
+            onChange={handleChange}
+            onKeyDown={handleKeyDown}
+            className='pl-10 py-6'
+          />
+          <Search className='absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground' />
+        </div>
+      </div>
+
+      {isPending && (
+        <div className='flex justify-center py-10'>
+          <Loader2 className='h-8 w-8 animate-spin text-primary' />
+        </div>
+      )}
+
+      {isSuccess && results && (
+        <div className='px-4'>
+          {results.users.length === 0 && results.posts.length === 0 ? (
+            <div className='flex flex-col items-center justify-center py-10 text-center px-4'>
+              <div className='bg-muted rounded-full p-4 mb-4'>
+                <Search className='h-8 w-8 text-muted-foreground' />
+              </div>
+              <h3 className='text-lg font-bold'>未找到相关结果</h3>
+              <p className='text-muted-foreground mt-1'>
+                尝试使用不同的关键词搜索
+              </p>
+            </div>
+          ) : (
+            <>
+              {results.users.length > 0 && (
+                <div className='mb-8'>
+                  <div className='flex items-center gap-2 mb-4'>
+                    <UserIcon className='h-5 w-5' />
+                    <h2 className='font-bold text-lg'>用户</h2>
+                  </div>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                    {results.users.map((user) => (
+                      <div
+                        key={user.id}
+                        className='border border-border/40 rounded-lg'
+                      >
+                        <UserCard user={user} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {results.posts.length > 0 && (
+                <div className='mb-8'>
+                  <div className='flex items-center gap-2 mb-4'>
+                    <svg
+                      xmlns='http://www.w3.org/2000/svg'
+                      viewBox='0 0 24 24'
+                      fill='none'
+                      stroke='currentColor'
+                      strokeWidth='2'
+                      strokeLinecap='round'
+                      strokeLinejoin='round'
+                      className='h-5 w-5'
+                    >
+                      <path d='M12 20.94c1.5 0 2.75 1.06 4 1.06 3 0 6-8 6-12.22A4.91 4.91 0 0 0 17 5c-2.22 0-4 1.44-5 2-1-.56-2.78-2-5-2a4.9 4.9 0 0 0-5 4.78C2 14 5 22 8 22c1.25 0 2.5-1.06 4-1.06Z' />
+                      <path d='M10 2c1 .5 2 2 2 5' />
+                    </svg>
+                    <h2 className='font-bold text-lg'>推文</h2>
+                  </div>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                    {results.posts.map((post) => (
+                      <div
+                        key={post.id}
+                        className='border border-border/40 rounded-lg'
+                      >
+                        <PostCard post={post} />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  );
+};

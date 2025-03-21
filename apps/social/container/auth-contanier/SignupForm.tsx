@@ -1,9 +1,7 @@
-'use client';
-
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { useSignup } from '@/http/useAuth';
+import { TokenResponse, useSignup } from '@/http/useAuth';
 import { Label } from '../../components/ui/label';
 import { Input } from '../../components/ui/input';
 import { Button } from '../../components/ui/button';
@@ -23,7 +21,11 @@ const signupSchema = z
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
-export function SignupForm() {
+export function SignupForm({
+  onSuccess,
+}: {
+  onSuccess: (data: TokenResponse) => void;
+}) {
   const { mutate: signup, isPending } = useSignup();
 
   const {
@@ -41,12 +43,19 @@ export function SignupForm() {
   });
 
   const onSubmit = (data: SignupFormValues) => {
-    signup({
-      name: data.username,
-      email: data.email,
-      password1: data.password,
-      password2: data.confirmPassword,
-    });
+    signup(
+      {
+        name: data.username,
+        email: data.email,
+        password1: data.password,
+        password2: data.confirmPassword,
+      },
+      {
+        onSuccess: (data) => {
+          onSuccess(data.token);
+        },
+      }
+    );
   };
 
   return (

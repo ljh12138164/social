@@ -9,6 +9,7 @@ def main():
     os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'wey_backend.settings')
     try:
         from django.core.management import execute_from_command_line
+        print("on API in http://127.0.0.1:8000/swagger/")
     except ImportError as exc:
         raise ImportError(
             "Couldn't import Django. Are you sure it's installed and "

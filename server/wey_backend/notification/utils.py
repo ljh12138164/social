@@ -1,12 +1,12 @@
 from .models import Notification
 
-from post.models import Post
+from post.models import Post, Comment
 from account.models import FriendshipRequest
 
 # create_notification(request, 'post_like', 'lskjf-j12l3-jlas-jdfa', 'lskjf-j12l3-jlas-jdfa')
 
 
-def create_notification(request, type_of_notification, post_id=None, friendrequest_id=None):
+def create_notification(request, type_of_notification, post_id=None, friendrequest_id=None, comment_id=None):
     created_for = None
 
     if type_of_notification == 'post_like':
@@ -17,6 +17,10 @@ def create_notification(request, type_of_notification, post_id=None, friendreque
         body = f'{request.user.name} commented on one of your posts!'
         post = Post.objects.get(pk=post_id)
         created_for = post.created_by
+    elif type_of_notification == 'comment_like':
+        body = f'{request.user.name} liked your comment!'
+        comment = Comment.objects.get(pk=comment_id)
+        created_for = comment.created_by
     elif type_of_notification == 'new_friendrequest':
         friendrequest = FriendshipRequest.objects.get(pk=friendrequest_id)
         created_for = friendrequest.created_for

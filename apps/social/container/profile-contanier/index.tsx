@@ -11,7 +11,7 @@ export const ProfileContainer = () => {
   const { data: profile, isLoading } = useProfile();
   if (isLoading) return <>加载中...</>;
   if (!profile) {
-    router.push('/not-found');
+    // router.push('/not-found');
     return <></>;
   }
 

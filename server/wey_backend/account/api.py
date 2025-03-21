@@ -2,8 +2,10 @@ from django.conf import settings
 from django.contrib.auth.forms import PasswordChangeForm
 from django.core.mail import send_mail
 from django.http import JsonResponse
+from django.contrib.auth import authenticate
 
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework_simplejwt.tokens import RefreshToken
 
 from notification.utils import create_notification
 
@@ -28,7 +30,6 @@ def me(request):
 @permission_classes([])
 def signup(request):
     data = request.data
-    message = 'success'
 
     form = SignupForm({
         'email': data.get('email'),
@@ -39,24 +40,27 @@ def signup(request):
 
     if form.is_valid():
         user = form.save()
-        user.is_active = False
+        # 直接设置用户为激活状态
+        user.is_active = True
         user.save()
-
-        url = f'{settings.WEBSITE_URL}/activateemail/?email={user.email}&id={user.id}'
-
-        send_mail(
-            "Please verify your email",
-            f"The url for activating your account is: {url}",
-            "noreply@wey.com",
-            [user.email],
-            fail_silently=False,
-        )
+        
+        # 生成JWT令牌
+        refresh = RefreshToken.for_user(user)
+        
+        return JsonResponse({
+            'message': 'success',
+            'user': {
+                'id': user.id,
+                'name': user.name,
+                'email': user.email,
+            },
+            'token': {
+                'access': str(refresh.access_token),
+                'refresh': str(refresh),
+            }
+        })
     else:
-        message = form.errors.as_json()
-    
-    print(message)
-
-    return JsonResponse({'message': message}, safe=False)
+        return JsonResponse({'message': form.errors.as_json()}, safe=False)
 
 
 @api_view(['GET'])

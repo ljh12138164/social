@@ -30,6 +30,7 @@ interface ChatMessage {
 
 // 用于存储在线用户
 const onlineUsers = new Map();
+console.log('socket server start at port 8100');
 
 io.on('connection', (socket) => {
   // 连接聊天

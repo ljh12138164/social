@@ -6,7 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { withAuth } from '@/container/auth-contanier/AuthContainer';
 import { UserAvatar } from '@/container/profile-contanier/UserAvatar';
 import { useProfile } from '@/http/useAuth';
-import { useCreatePost, usePosts } from '@/http/usePost';
+import { Post, useCreatePost, useLikePost, usePosts } from '@/http/usePost';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
@@ -21,6 +21,103 @@ import {
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
+// 新建 PostItem 组件
+const PostItem = ({ post }: { post: Post }) => {
+  const { mutate: likePost, isPending: isLiking } = useLikePost(post.id);
+  const router = useRouter();
+
+  return (
+    <div
+      onClick={() => {
+        router.push(`/post/${post.id}`);
+      }}
+      className='p-4 hover:bg-accent/40 cursor-pointer transition-colors'
+    >
+      <div className='flex gap-4'>
+        <div className='w-10 h-10 rounded-full bg-muted shadow-sm overflow-hidden group'>
+          {post.created_by.get_avatar && (
+            <UserAvatar
+              src={post.created_by.get_avatar}
+              alt={post.created_by.name}
+              className='w-full h-full object-cover transition-transform group-hover:scale-110'
+            />
+          )}
+        </div>
+        <div className='flex-1 space-y-2'>
+          <div className='flex items-center gap-2'>
+            <span className='font-bold hover:underline cursor-pointer'>
+              {post.created_by.name}
+            </span>
+            <span className='text-muted-foreground hover:underline cursor-pointer'>
+              @{post.created_by.email}
+            </span>
+            <span className='text-muted-foreground'>·</span>
+            <span className='text-muted-foreground hover:underline cursor-pointer ml-auto'>
+              {format(new Date(post.created_at), 'PP', {
+                locale: zhCN,
+              })}
+            </span>
+          </div>
+          <p className='text-[15px] leading-normal'>{post.body}</p>
+          <div className='flex items-center justify-between max-w-md text-muted-foreground'>
+            <Button
+              variant='ghost'
+              size='sm'
+              className='flex items-center gap-2 hover:text-blue-500 hover:bg-blue-500/10 transition-colors rounded-full -ml-2 group'
+              onClick={(e) => {
+                e.stopPropagation();
+                router.push(`/post/${post.id}`);
+              }}
+            >
+              <MessageSquare className='h-4 w-4 transition-transform group-hover:scale-110' />
+              <span className='group-hover:text-blue-500'>
+                {post.comments_count}
+              </span>
+            </Button>
+            <Button
+              variant='ghost'
+              size='sm'
+              className={cn(
+                'flex items-center gap-2 hover:text-pink-500 hover:bg-pink-500/10 transition-colors rounded-full group',
+                post.is_liked && 'text-pink-500'
+              )}
+              onClick={(e) => {
+                e.stopPropagation();
+                likePost();
+              }}
+              disabled={isLiking}
+            >
+              <Heart
+                className={cn(
+                  'h-4 w-4 transition-transform group-hover:scale-110',
+                  isLiking && 'animate-pulse',
+                  post.is_liked && 'fill-current'
+                )}
+              />
+              <span
+                className={cn(
+                  'group-hover:text-pink-500',
+                  post.is_liked && 'text-pink-500'
+                )}
+              >
+                {post.likes_count}
+              </span>
+            </Button>
+            <Button
+              variant='ghost'
+              size='sm'
+              className='flex items-center gap-2 hover:text-blue-500 hover:bg-blue-500/10 transition-colors rounded-full group'
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Share2 className='h-4 w-4 transition-transform group-hover:scale-110' />
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const HomePage = () => {
   const [newPost, setNewPost] = useState('');
   const [activeTab, setActiveTab] = useState<'recommend' | 'following'>(
@@ -29,7 +126,6 @@ const HomePage = () => {
   const { data: posts, isLoading } = usePosts();
   const createPost = useCreatePost();
   const { data: profile } = useProfile();
-  const router = useRouter();
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
     createPost.mutate(
@@ -151,73 +247,7 @@ const HomePage = () => {
             <Loader2 className='h-8 w-8 animate-spin text-primary' />
           </div>
         ) : (
-          posts?.map((post) => (
-            <div
-              key={post.id}
-              onClick={() => {
-                router.push(`/post/${post.id}`);
-              }}
-              className='p-4 hover:bg-accent/40 cursor-pointer transition-colors'
-            >
-              <div className='flex gap-4'>
-                <div className='w-10 h-10 rounded-full bg-muted shadow-sm overflow-hidden group'>
-                  {post.created_by.get_avatar && (
-                    <UserAvatar
-                      src={post.created_by.get_avatar}
-                      alt={post.created_by.name}
-                      className='w-full h-full object-cover transition-transform group-hover:scale-110'
-                    />
-                  )}
-                </div>
-                <div className='flex-1 space-y-2'>
-                  <div className='flex items-center gap-2'>
-                    <span className='font-bold hover:underline cursor-pointer'>
-                      {post.created_by.name}
-                    </span>
-                    <span className='text-muted-foreground hover:underline cursor-pointer'>
-                      @{post.created_by.email}
-                    </span>
-                    <span className='text-muted-foreground'>·</span>
-                    <span className='text-muted-foreground hover:underline cursor-pointer ml-auto'>
-                      {format(new Date(post.created_at), 'PP', {
-                        locale: zhCN,
-                      })}
-                    </span>
-                  </div>
-                  <p className='text-[15px] leading-normal'>{post.body}</p>
-                  <div className='flex items-center justify-between max-w-md text-muted-foreground'>
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      className='flex items-center gap-2 hover:text-blue-500 hover:bg-blue-500/10 transition-colors rounded-full -ml-2 group'
-                    >
-                      <MessageSquare className='h-4 w-4 transition-transform group-hover:scale-110' />
-                      <span className='group-hover:text-blue-500'>
-                        {post.comments_count}
-                      </span>
-                    </Button>
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      className='flex items-center gap-2 hover:text-pink-500 hover:bg-pink-500/10 transition-colors rounded-full group'
-                    >
-                      <Heart className='h-4 w-4 transition-transform group-hover:scale-110' />
-                      <span className='group-hover:text-pink-500'>
-                        {post.likes_count}
-                      </span>
-                    </Button>
-                    <Button
-                      variant='ghost'
-                      size='sm'
-                      className='flex items-center gap-2 hover:text-blue-500 hover:bg-blue-500/10 transition-colors rounded-full group'
-                    >
-                      <Share2 className='h-4 w-4 transition-transform group-hover:scale-110' />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))
+          posts?.map((post) => <PostItem key={post.id} post={post} />)
         )}
       </div>
     </>

@@ -3,6 +3,8 @@ from django.http import JsonResponse
 from django.http.response import HttpResponseBadRequest
 
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.response import Response
+from rest_framework import status
 
 from account.models import User, FriendshipRequest
 from account.serializers import UserSerializer
@@ -27,7 +29,7 @@ def post_list(request):
     if trend:
         posts = posts.filter(body__icontains='#' + trend).filter(is_private=False)
 
-    serializer = PostSerializer(posts, many=True)
+    serializer = PostSerializer(posts, many=True, context={'request': request})
 
     return JsonResponse(serializer.data, safe=False)
 
@@ -42,7 +44,7 @@ def post_detail(request, pk):
     post = Post.objects.filter(Q(created_by_id__in=list(user_ids)) | Q(is_private=False)).get(pk=pk)
 
     return JsonResponse({
-        'post': PostDetailSerializer(post).data
+        'post': PostDetailSerializer(post, context={'request': request}).data
     })
 
 
@@ -51,15 +53,18 @@ def post_list_profile(request, id):
     user = User.objects.get(pk=id)
     posts = Post.objects.filter(created_by_id=id)
 
-    if not request.user in user.friends.all():
+    # 判断是否为好友
+    is_friend = request.user in user.friends.all()
+
+    if not is_friend:
         posts = posts.filter(is_private=False)
 
-    posts_serializer = PostSerializer(posts, many=True)
+    posts_serializer = PostSerializer(posts, many=True, context={'request': request})
     user_serializer = UserSerializer(user)
 
     can_send_friendship_request = True
 
-    if request.user in user.friends.all():
+    if is_friend:
         can_send_friendship_request = False
     
     check1 = FriendshipRequest.objects.filter(created_for=request.user).filter(created_by=user)
@@ -71,7 +76,8 @@ def post_list_profile(request, id):
     return JsonResponse({
         'posts': posts_serializer.data,
         'user': user_serializer.data,
-        'can_send_friendship_request': can_send_friendship_request
+        'can_send_friendship_request': can_send_friendship_request,
+        'is_friend': is_friend
     }, safe=False)
 
 
@@ -98,7 +104,7 @@ def post_create(request):
         user.posts_count = user.posts_count + 1
         user.save()
 
-        serializer = PostSerializer(post)
+        serializer = PostSerializer(post, context={'request': request})
 
         return JsonResponse(serializer.data, safe=False)
     else:
@@ -119,9 +125,19 @@ def post_like(request, pk):
 
         notification = create_notification(request, 'post_like', post_id=post.id)
 
-        return JsonResponse({'message': 'like created'})
+        serializer = PostSerializer(post, context={'request': request})
+        return JsonResponse(serializer.data, safe=False)
     else:
-        return HttpResponseBadRequest({'message': 'post already liked'})
+        # 如果已经点赞，则取消点赞
+        like = post.likes.filter(created_by=request.user).first()
+        if like:
+            post.likes.remove(like)
+            post.likes_count = post.likes_count - 1
+            post.save()
+            like.delete()
+
+        serializer = PostSerializer(post, context={'request': request})
+        return JsonResponse(serializer.data, safe=False)
 
 
 @api_view(['POST'])
@@ -135,7 +151,7 @@ def post_create_comment(request, pk):
 
     notification = create_notification(request, 'post_comment', post_id=post.id)
 
-    serializer = CommentSerializer(comment)
+    serializer = CommentSerializer(comment, context={'request': request})
 
     return JsonResponse(serializer.data, safe=False)
 
@@ -162,3 +178,35 @@ def get_trends(request):
     serializer = TrendSerializer(Trend.objects.all(), many=True)
 
     return JsonResponse(serializer.data, safe=False)
+
+
+@api_view(['POST'])
+def comment_like(request, pk, comment_id):
+    try:
+        comment = Comment.objects.get(pk=comment_id)
+    except Comment.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    # 检查用户是否已对评论点赞
+    like_exists = comment.likes.filter(created_by=request.user).exists()
+
+    if not like_exists:
+        # 创建点赞
+        like = Like.objects.create(created_by=request.user)
+        comment.likes.add(like)
+        comment.likes_count += 1
+        comment.save()
+        
+        # 可选：创建通知
+        create_notification(request, 'comment_like', comment_id=comment.id)
+    else:
+        # 取消点赞
+        like = comment.likes.filter(created_by=request.user).first()
+        if like:
+            comment.likes.remove(like)
+            comment.likes_count -= 1
+            comment.save()
+            like.delete()
+
+    serializer = CommentSerializer(comment, context={'request': request})
+    return Response(serializer.data)
