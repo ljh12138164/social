@@ -144,40 +144,6 @@ const HomePage = () => {
       <div className='sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/40 z-10'>
         <div className='flex items-center justify-between p-4'>
           <h1 className='text-xl font-bold'>首页</h1>
-          <div className='flex gap-2'>
-            <Button
-              variant='ghost'
-              size='sm'
-              className={cn(
-                'font-medium transition-colors relative',
-                activeTab === 'recommend'
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-              onClick={() => setActiveTab('recommend')}
-            >
-              为你推荐
-              {activeTab === 'recommend' && (
-                <div className='absolute bottom-0 left-0 w-full h-1 bg-primary rounded-full' />
-              )}
-            </Button>
-            <Button
-              variant='ghost'
-              size='sm'
-              className={cn(
-                'font-medium transition-colors relative',
-                activeTab === 'following'
-                  ? 'text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-              onClick={() => setActiveTab('following')}
-            >
-              关注
-              {activeTab === 'following' && (
-                <div className='absolute bottom-0 left-0 w-full h-1 bg-primary rounded-full' />
-              )}
-            </Button>
-          </div>
         </div>
       </div>
 

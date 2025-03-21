@@ -12,7 +12,6 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { useMBTI, useSaveMBTI } from '@/http/useMibt';
 import { useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
 
 // MBTI类型映射
 const personalityTypes = {
@@ -60,7 +59,6 @@ const MBTITest = ({ onComplete }: MBTITestProps) => {
   const [result, setResult] = useState<MBTIResult | null>(null);
   const [progress, setProgress] = useState(0);
   const { data: questions, isLoading: isLoadingQuestions } = useMBTI();
-  const { mutate: saveMBTI, isPending: isSaving } = useSaveMBTI();
 
   // 从localStorage恢复测试状态
   useEffect(() => {
@@ -240,15 +238,6 @@ const MBTITest = ({ onComplete }: MBTITestProps) => {
     localStorage.removeItem('mbti_results');
   };
 
-  const saveResult = () => {
-    if (!result) return;
-    saveMBTI(result, {
-      onSuccess: () => {
-        toast.success('测试结果保存成功');
-      },
-    });
-  };
-
   if (isLoadingQuestions || isLoading) {
     return (
       <div className='flex justify-center items-center min-h-[400px]'>
@@ -335,9 +324,6 @@ const MBTITest = ({ onComplete }: MBTITestProps) => {
         <CardFooter className='flex justify-center space-x-4'>
           <Button variant='outline' onClick={resetTest}>
             重新测试
-          </Button>
-          <Button variant='default' onClick={saveResult} disabled={isSaving}>
-            完成测试
           </Button>
         </CardFooter>
       </Card>

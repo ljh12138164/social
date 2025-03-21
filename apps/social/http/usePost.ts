@@ -255,7 +255,7 @@ export const useCreateComment = (postId: string) => {
 
 /**
  * ### 点赞/取消点赞评论
- * @param postId 推文ID
+ * @param posId 推文ID
  * @param commentId 评论ID
  * @returns 点赞操作的 mutation 函数和状态
  */
@@ -317,6 +317,19 @@ export const useLikeComment = (postId: string, commentId: string) => {
     onSettled: () => {
       // 无论成功或失败，都重新获取最新数据
       queryClient.invalidateQueries({ queryKey: ['post', postId] });
+    },
+  });
+};
+
+/**
+ * ### 获取趋势
+ */
+export const getTrend = () => {
+  return useQuery<Post[]>({
+    queryKey: ['trend'],
+    queryFn: async () => {
+      const response = await get<Post[]>('/posts/trends/');
+      return response;
     },
   });
 };

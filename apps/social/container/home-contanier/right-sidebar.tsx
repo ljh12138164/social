@@ -2,6 +2,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useFriendSuggestions } from '@/http/useFriendship';
+import { getTrend } from '@/http/usePost';
 import { post } from '@/lib/http';
 import { getInitials } from '@/lib/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,7 +25,10 @@ export const RightSidebar = () => {
   const pathname = usePathname();
   const isShown = SHOWN_SIDEBAR_PATHS.includes(pathname.split('/')[1]);
 
+  // 好友推荐
   const { data: suggestedUsers, isLoading } = useFriendSuggestions();
+  const { data: trendPosts, isLoading: isTrendLoading } = getTrend();
+
   const queryClient = useQueryClient();
 
   // 发送好友请求的mutation

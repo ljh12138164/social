@@ -15,7 +15,7 @@ export interface UserProfile {
   posts_count: number;
   get_avatar: string;
   bio?: string;
-  mbti_result?: MBTIResult;
+  mbti_result: MBTIResult | null;
 }
 
 export interface Profile {

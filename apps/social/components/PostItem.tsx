@@ -1,7 +1,7 @@
 'use client';
 
 import { UserAvatar } from '@/container/profile-contanier/UserAvatar';
-import { Post, useLikePost } from '@/http/usePost';
+import { Post } from '@/http/usePost';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
@@ -10,7 +10,6 @@ import { useRouter } from 'next/navigation';
 import { Button } from './ui/button';
 
 export const PostItem = ({ post }: { post: Post }) => {
-  const { mutate: likePost, isPending: isLiking } = useLikePost(post.id);
   const router = useRouter();
 
   return (
@@ -80,16 +79,10 @@ export const PostItem = ({ post }: { post: Post }) => {
               )}
               onClick={(e) => {
                 e.stopPropagation();
-                likePost();
               }}
-              disabled={isLiking}
             >
               <Heart
-                className={cn(
-                  'h-4 w-4',
-                  isLiking && 'animate-pulse',
-                  post.is_liked && 'fill-current'
-                )}
+                className={cn('h-4 w-4', post.is_liked && 'fill-current')}
               />
               <span className={cn(post.is_liked && 'text-pink-500')}>
                 {post.likes_count || ''}
