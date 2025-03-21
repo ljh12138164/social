@@ -79,3 +79,41 @@ class FriendshipRequest(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     created_by = models.ForeignKey(User, related_name='created_friendshiprequests', on_delete=models.CASCADE)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=SENT)
+
+
+class MibtTestResult(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    user = models.ForeignKey(User, related_name='mibt_results', on_delete=models.CASCADE)
+    
+    # MIBT类型选项
+    ANALYST = 'analyst'
+    DIPLOMAT = 'diplomat'
+    SENTINEL = 'sentinel'
+    EXPLORER = 'explorer'
+    
+    TYPE_CHOICES = (
+        (ANALYST, '分析型人格'),
+        (DIPLOMAT, '外交型人格'),
+        (SENTINEL, '哨兵型人格'),
+        (EXPLORER, '探索型人格'),
+    )
+    
+    # 人格类型，例如：INTJ, ENFP等
+    personality_type = models.CharField(max_length=4)
+    # 人格大类
+    personality_category = models.CharField(max_length=20, choices=TYPE_CHOICES)
+    # 具体的测试分数
+    introversion_score = models.IntegerField(default=0)
+    extroversion_score = models.IntegerField(default=0)
+    intuition_score = models.IntegerField(default=0)
+    sensing_score = models.IntegerField(default=0)
+    thinking_score = models.IntegerField(default=0)
+    feeling_score = models.IntegerField(default=0)
+    judging_score = models.IntegerField(default=0)
+    perceiving_score = models.IntegerField(default=0)
+    
+    # 测试完成时间
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.user.name} - {self.personality_type}"

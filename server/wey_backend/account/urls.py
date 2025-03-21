@@ -14,4 +14,9 @@ urlpatterns = [
     path('friends/<uuid:pk>/', api.friends, name='friends'),
     path('friends/<uuid:pk>/request/', api.send_friendship_request, name='send_friendship_request'),
     path('friends/<uuid:pk>/<str:status>/', api.handle_request, name='handle_request'),
+    
+    # MIBT测试结果相关API
+    path('mibt/save/', api.save_mibt_result, name='save_mibt_result'),
+    path('mibt/result/', api.get_mibt_result, name='get_mibt_result'),
+    path('mibt/result/<uuid:user_id>/', api.get_mibt_result, name='get_user_mibt_result'),
 ]

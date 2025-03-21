@@ -1,20 +1,42 @@
 import { useFriends, useFriendSuggestions } from '@/http/useFriendship';
 import { FriendRequestsDialog, FriendsList } from '.';
+import { ChatContainer } from '../chat-container';
+import { useSearchParams } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { useConversations } from '@/http/useChat';
+import { ActiveConversation } from '../chat-container/ChatContainer';
 
 export const FriendsContainer = () => {
+  const searchParams = useSearchParams();
+  const activeConversationId = searchParams.get('active');
+  const [activeConversation, setActiveConversation] =
+    useState<ActiveConversation | null>(null);
+
+  // 获取会话列表
+  const { data: conversations } = useConversations();
+
   // 获取好友列表和好友请求
-  const {
-    data: friendsData,
-    isLoading: isLoadingFriends,
-    error: friendsError,
-  } = useFriends();
+  const { error: friendsError } = useFriends();
 
   // 获取好友推荐
-  const {
-    data: suggestionsData,
-    isLoading: isLoadingSuggestions,
-    error: suggestionsError,
-  } = useFriendSuggestions();
+  const { error: suggestionsError } = useFriendSuggestions();
+
+  // 当 activeConversationId 或会话列表变化时，设置当前活跃会话
+  useEffect(() => {
+    if (activeConversationId && conversations) {
+      const conversation = conversations.find(
+        (conv) => conv.id === activeConversationId
+      );
+      if (conversation) {
+        setActiveConversation({
+          id: conversation.id,
+          userId: conversation.userId || '',
+          userName: conversation.userName || '',
+          avatar: conversation.avatar,
+        });
+      }
+    }
+  }, [activeConversationId, conversations]);
 
   if (friendsError || suggestionsError) {
     return (
@@ -26,28 +48,7 @@ export const FriendsContainer = () => {
 
   return (
     <div className='space-y-8'>
-      {/* 页面顶部的操作区域 */}
-      <div className='flex justify-between items-center'>
-        <h2 className='text-2xl font-semibold'>好友列表</h2>
-
-        {/* 好友申请按钮（弹窗） */}
-        <FriendRequestsDialog
-          requests={friendsData?.requests || []}
-          isLoading={isLoadingFriends}
-        />
-      </div>
-
-      {/* 好友列表 */}
-      <FriendsList
-        friends={friendsData?.friends || []}
-        isLoading={isLoadingFriends}
-      />
-
-      {/* 好友推荐 */}
-      {/* <FriendSuggestions
-        suggestions={suggestionsData || []}
-        isLoading={isLoadingSuggestions}
-      /> */}
+      <ChatContainer initialActiveConversation={activeConversation} />
     </div>
   );
 };

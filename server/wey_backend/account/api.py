@@ -10,18 +10,29 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from notification.utils import create_notification
 
 from .forms import SignupForm, ProfileForm
-from .models import User, FriendshipRequest
-from .serializers import UserSerializer, FriendshipRequestSerializer
+from .models import User, FriendshipRequest, MibtTestResult
+from .serializers import UserSerializer, FriendshipRequestSerializer, MibtTestResultSerializer
 
 
 @api_view(['GET'])
 def me(request):
+    user = request.user
+    
+    # 尝试获取MBTI测试结果
+    try:
+        mibt_result = MibtTestResult.objects.get(user=user)
+        mibt_serializer = MibtTestResultSerializer(mibt_result)
+        mibt_data = mibt_serializer.data
+    except MibtTestResult.DoesNotExist:
+        mibt_data = None
+    
     return JsonResponse({
-        'id': request.user.id,
-        'name': request.user.name,
-        'email': request.user.email,
-        'avatar': request.user.get_avatar(),
-        'bio': request.user.bio,
+        'id': user.id,
+        'name': user.name,
+        'email': user.email,
+        'avatar': user.get_avatar(),
+        'bio': user.bio,
+        'mbti_result': mibt_data
     })
 
 
@@ -168,3 +179,56 @@ def handle_request(request, pk, status):
     notification = create_notification(request, 'accepted_friendrequest', friendrequest_id=friendship_request.id)
 
     return JsonResponse({'message': 'friendship request updated'})
+
+@api_view(['POST'])
+def save_mibt_result(request):
+    """
+    保存用户的MIBT测试结果
+    """
+    data = request.data
+    
+    # 创建或更新MIBT测试结果
+    mibt_result, created = MibtTestResult.objects.update_or_create(
+        user=request.user,
+        defaults={
+            'personality_type': data.get('personality_type'),
+            'personality_category': data.get('personality_category'),
+            'introversion_score': data.get('introversion_score', 0),
+            'extroversion_score': data.get('extroversion_score', 0),
+            'intuition_score': data.get('intuition_score', 0),
+            'sensing_score': data.get('sensing_score', 0),
+            'thinking_score': data.get('thinking_score', 0),
+            'feeling_score': data.get('feeling_score', 0),
+            'judging_score': data.get('judging_score', 0),
+            'perceiving_score': data.get('perceiving_score', 0),
+        }
+    )
+    
+    serializer = MibtTestResultSerializer(mibt_result)
+    
+    return JsonResponse({
+        'message': '保存MIBT测试结果成功',
+        'result': serializer.data
+    })
+
+
+@api_view(['GET'])
+def get_mibt_result(request, user_id=None):
+    """
+    获取用户的MIBT测试结果
+    如果未提供user_id参数，则返回当前登录用户的结果
+    """
+    if user_id:
+        try:
+            user = User.objects.get(id=user_id)
+        except User.DoesNotExist:
+            return JsonResponse({'error': '用户不存在'}, status=404)
+    else:
+        user = request.user
+    
+    try:
+        mibt_result = MibtTestResult.objects.get(user=user)
+        serializer = MibtTestResultSerializer(mibt_result)
+        return JsonResponse(serializer.data)
+    except MibtTestResult.DoesNotExist:
+        return JsonResponse({'error': '该用户尚未完成MIBT测试'}, status=404)

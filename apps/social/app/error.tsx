@@ -15,7 +15,7 @@ export default function GlobalError() {
             抱歉，页面加载过程中发生了错误
           </p>
         </div>
-        <div className='animate-bounce text-6xl'>😢😢😢</div>
+        <div className='animate-bounce text-6xl'>😅😅😅</div>
         <Button
           color='primary'
           variant='outline'

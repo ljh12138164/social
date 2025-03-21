@@ -12,6 +12,8 @@ import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { UserAvatar } from './UserAvatar';
 import { useSendFriendRequest, useUserProfile } from '@/http/useProfile';
+import { useCreateOrGetConversation } from '@/http/useChat';
+import { toast } from 'sonner';
 
 // 推文项组件
 const PostItem = ({ post }: { post: Post }) => {
@@ -96,6 +98,26 @@ export const UserProfileContainer = () => {
   const { data, isLoading } = useUserProfile(userId);
   const sendFriendRequest = useSendFriendRequest(userId);
 
+  // 创建或获取聊天会话
+  const { mutate: createOrGetConversation, isPending: isCreatingChat } =
+    useCreateOrGetConversation();
+
+  // 处理发送消息按钮点击
+  const handleSendMessage = () => {
+    if (!userId) return;
+
+    createOrGetConversation(userId, {
+      onSuccess: () => {
+        // 成功创建或获取会话后，跳转到好友页面并传递会话ID作为active参数
+        router.push(`/friends?active=${userId}`);
+        toast.success(`开始与 ${user.name} 的会话`);
+      },
+      onError: () => {
+        toast.error('创建会话失败，请稍后再试');
+      },
+    });
+  };
+
   if (isLoading) {
     return (
       <div className='flex justify-center items-center min-h-screen'>
@@ -105,7 +127,6 @@ export const UserProfileContainer = () => {
   }
 
   if (!data) {
-    // router.push('/not-found');
     return null;
   }
 
@@ -133,8 +154,18 @@ export const UserProfileContainer = () => {
             <p className='text-muted-foreground'>{user.email}</p>
           </div>
           <div className='flex gap-2'>
-            <Button size='sm' variant='outline' className='rounded-full'>
-              <Mail className='h-4 w-4 mr-2' />
+            <Button
+              size='sm'
+              variant='outline'
+              className='rounded-full'
+              onClick={handleSendMessage}
+              disabled={isCreatingChat}
+            >
+              {isCreatingChat ? (
+                <Loader2 className='h-4 w-4 animate-spin mr-2' />
+              ) : (
+                <Mail className='h-4 w-4 mr-2' />
+              )}
               发消息
             </Button>
 
@@ -187,6 +218,7 @@ export const UserProfileContainer = () => {
           </div>
         </div>
       </div>
+      {/* MBTI 测试结果 */}
 
       {/* 标签页 */}
       <div className='px-4 sm:px-8'>

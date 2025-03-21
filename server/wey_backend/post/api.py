@@ -81,6 +81,41 @@ def post_list_profile(request, id):
     }, safe=False)
 
 
+@api_view(['GET'])
+def post_list_liked(request, id):
+    user = User.objects.get(pk=id)
+    
+    # 检查权限
+    is_self = request.user.id == user.id
+    is_friend = request.user in user.friends.all()
+    
+    if not (is_self or is_friend):
+        # 非本人或好友只能看到公开帖子的点赞
+        likes = Like.objects.filter(created_by=user)
+        post_ids = []
+        
+        for like in likes:
+            posts = Post.objects.filter(likes=like, is_private=False)
+            for post in posts:
+                post_ids.append(post.id)
+    else:
+        # 本人或好友可以看到所有点赞
+        likes = Like.objects.filter(created_by=user)
+        post_ids = []
+        
+        for like in likes:
+            posts = Post.objects.filter(likes=like)
+            for post in posts:
+                post_ids.append(post.id)
+    
+    # 去重并获取帖子
+    unique_post_ids = list(set(post_ids))
+    liked_posts = Post.objects.filter(id__in=unique_post_ids)
+    
+    serializer = PostSerializer(liked_posts, many=True, context={'request': request})
+    return JsonResponse(serializer.data, safe=False)
+
+
 @api_view(['POST'])
 def post_create(request):
     form = PostForm(request.POST)

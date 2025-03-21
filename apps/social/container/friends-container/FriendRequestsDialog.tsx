@@ -1,23 +1,23 @@
-import { FriendshipRequest } from '@/http/useFriendship';
-import {
-  useAcceptFriendRequest,
-  useRejectFriendRequest,
-} from '@/http/useFriendship';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { getInitials } from '@/lib/utils';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { Check, X, UserPlus, Bell } from 'lucide-react';
+import {
+  FriendshipRequest,
+  useAcceptFriendRequest,
+  useRejectFriendRequest,
+} from '@/http/useFriendship';
+import { getInitials } from '@/lib/utils';
+import { Bell, Check, X } from 'lucide-react';
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
 
 interface FriendRequestsDialogProps {
   requests: FriendshipRequest[];

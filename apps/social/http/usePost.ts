@@ -235,7 +235,7 @@ export const useCreateComment = (postId: string) => {
       // 返回快照用于回滚
       return { previousPost };
     },
-    onError: (err, variables, context) => {
+    onError: (err, _, context) => {
       // 如果发生错误，回滚到快照
       if (context?.previousPost) {
         queryClient.setQueryData(['post', postId], context.previousPost);
@@ -304,7 +304,7 @@ export const useLikeComment = (postId: string, commentId: string) => {
       // 返回快照用于回滚
       return { previousPost };
     },
-    onError: (err, variables, context) => {
+    onError: (err, _, context) => {
       // 如果发生错误，回滚到快照
       if (context?.previousPost) {
         queryClient.setQueryData(['post', postId], context.previousPost);

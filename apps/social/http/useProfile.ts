@@ -1,12 +1,28 @@
+'use client';
+
 import { get, post } from '@/lib/http';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Post } from './usePost';
 import toast from 'react-hot-toast';
+import { MBTIResult } from '@/container/mibt-contanier/MBTITest';
+
+export interface UserProfile {
+  id: string;
+  name: string;
+  email: string;
+  avatar: string;
+  friends_count: number;
+  posts_count: number;
+  get_avatar: string;
+  bio?: string;
+  mbti_result?: MBTIResult;
+}
 
 export interface Profile {
   id: number;
   name: string;
   email: string;
+  mbti_result: MBTIResult | null;
   avatar?: string;
   bio?: string;
 }
@@ -68,21 +84,10 @@ export const useUpdateProfile = () => {
   });
 };
 
-interface UserProfile {
-  id: string;
-  name: string;
-  email: string;
-  get_avatar: string;
-  bio: string;
-  friends_count: number;
-  posts_count: number;
-  can_send_friendship_request: boolean;
-}
-
 /**
  * ### 获取用户资料
  */
-export const useUserProfile = (userId: string) => {
+export const useUserProfile = (userId: string | undefined) => {
   return useQuery<{
     user: UserProfile;
     posts: Post[];
@@ -97,6 +102,20 @@ export const useUserProfile = (userId: string) => {
         can_send_friendship_request: boolean;
         is_friend: boolean;
       }>(`/posts/profile/${userId}/`);
+      return response;
+    },
+    enabled: !!userId,
+  });
+};
+
+/**
+ * ### 获取用户点赞的帖子
+ */
+export const useUserLikes = (userId: string | undefined) => {
+  return useQuery<Post[]>({
+    queryKey: ['userLikes', userId],
+    queryFn: async () => {
+      const response = await get<Post[]>(`/posts/profile/${userId}/likes/`);
       return response;
     },
     enabled: !!userId,

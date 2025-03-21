@@ -1,22 +1,29 @@
 import { Hono } from 'hono';
+import type { Server as HTTPServer } from 'node:http';
+import { cors } from 'hono/cors';
 import { serve } from '@hono/node-server';
 import { Server } from 'socket.io';
 
-const app = new Hono();
+const app = new Hono().use(
+  cors({
+    origin: (origin) => origin || '*',
+    credentials: true,
+  })
+);
 
-serve({
+const httpServer = serve({
   fetch: app.fetch,
   port: 8100,
 });
 
-const io = new Server({
+const io = new Server(httpServer as HTTPServer, {
   /* options */
   cors: {
     origin: '*',
     credentials: true,
   },
-  addTrailingSlash: false,
   path: '/socket.io/',
+  transports: ['websocket'],
 });
 
 interface ChatMessage {
@@ -30,7 +37,6 @@ interface ChatMessage {
 
 // 用于存储在线用户
 const onlineUsers = new Map();
-console.log('socket server start at port 8100');
 
 io.on('connection', (socket) => {
   // 连接聊天
@@ -54,8 +60,8 @@ io.on('connection', (socket) => {
   // 发送消息
   socket.on('sendMessage', (data: ChatMessage) => {
     // 创建会话ID
-    const conversationId = [data.sendId, data.converId].sort().join('_');
-
+    const { conversationId } = data;
+    console.log(conversationId);
     // 添加时间戳和会话ID
     const messageWithTimestamp = {
       ...data,

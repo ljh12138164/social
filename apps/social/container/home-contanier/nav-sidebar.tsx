@@ -48,7 +48,7 @@ const navItems = [
 
 export const NavSidebar = () => {
   const pathname = usePathname();
-  const { data: profile, isLoading } = useProfile();
+  const { data: profile } = useProfile();
 
   return (
     <div className='fixed w-[275px] h-screen border-r border-border/40 px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>

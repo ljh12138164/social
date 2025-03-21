@@ -2,6 +2,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { post, get } from '@/lib/http';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
+import { MBTIResult } from '@/container/mibt-contanier/MBTITest';
 
 export interface TokenResponse {
   access: string;
@@ -21,11 +22,12 @@ interface SignupCredentials {
 }
 
 interface Profile {
-  id: number;
+  id: string;
   email: string;
   name: string;
   avatar?: string;
   bio?: string;
+  mbti_result: MBTIResult | null;
 }
 
 /**
