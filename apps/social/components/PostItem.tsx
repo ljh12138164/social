@@ -10,6 +10,8 @@ import { useRouter } from 'next/navigation';
 import Render from './Rich/Render';
 import { Button } from './ui/button';
 import { Separator } from './ui/separator';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import Image from 'next/image';
 
 export const PostItem = ({ post }: { post: Post }) => {
   const { mutate: likePost } = useLikePost(post.id);
@@ -52,15 +54,32 @@ export const PostItem = ({ post }: { post: Post }) => {
               <Render data={post.body} />
             </div>
             {post.attachments && post.attachments.length > 0 && (
-              <div className='mt-2 grid grid-cols-2 gap-2'>
-                {post.attachments.map((attachment) => (
-                  <img
-                    key={attachment.id}
-                    src={attachment.file}
-                    alt=''
-                    className='w-full h-full object-cover rounded-xl'
-                  />
-                ))}
+              <div
+                className={cn('mt-2 gap-2 grid grid-cols-4')}
+                onClick={(e) => {
+                  e.stopPropagation();
+                }}
+              >
+                <PhotoProvider>
+                  {post.attachments.map((attachment) => {
+                    return (
+                      <div
+                        key={attachment.id}
+                        className='relative rounded-xl overflow-hidden bg-black/5 border-2 p-2 border-border/40 flex items-center justify-center'
+                        style={{ height: 'auto', minHeight: '120px' }}
+                      >
+                        <PhotoView src={attachment.get_image}>
+                          <Image
+                            width={100}
+                            height={100}
+                            src={attachment.get_image}
+                            alt='图片'
+                          />
+                        </PhotoView>
+                      </div>
+                    );
+                  })}
+                </PhotoProvider>
               </div>
             )}
             <div className='flex items-center  pt-2'>

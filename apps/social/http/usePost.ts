@@ -34,7 +34,7 @@ export interface Post {
   created_at: string;
   attachments: {
     id: string;
-    file: string;
+    get_image: string;
   }[];
   comments?: Comment[];
 }

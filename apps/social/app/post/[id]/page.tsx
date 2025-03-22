@@ -17,8 +17,10 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
 import { ArrowLeft, Heart, Loader2, MessageSquare, Share2 } from 'lucide-react';
+import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
 
 const CommentItem = ({
   comment,
@@ -171,15 +173,26 @@ const PostPage = () => {
               <Render data={post.body} />
             </div>
             {post.attachments.length > 0 && (
-              <div className='mt-4 grid grid-cols-2 gap-2'>
-                {post.attachments.map((attachment) => (
-                  <img
-                    key={attachment.id}
-                    src={attachment.file}
-                    alt=''
-                    className='w-full h-full object-cover rounded-xl'
-                  />
-                ))}
+              <div className='mt-4 grid grid-cols-4 gap-2'>
+                <PhotoProvider>
+                  {post.attachments.map((attachment) => (
+                    <div
+                      key={attachment.id}
+                      className='relative rounded-xl overflow-hidden bg-black/5 border-2 p-2 border-border/40 flex items-center justify-center'
+                      style={{ height: 'auto', minHeight: '120px' }}
+                    >
+                      <PhotoView src={attachment.get_image}>
+                        <Image
+                          width={100}
+                          height={100}
+                          src={attachment.get_image}
+                          alt='图片'
+                          className='w-[100px] h-[100px] cursor-pointer object-contain'
+                        />
+                      </PhotoView>
+                    </div>
+                  ))}
+                </PhotoProvider>
               </div>
             )}
             <div className='mt-4 text-muted-foreground'>

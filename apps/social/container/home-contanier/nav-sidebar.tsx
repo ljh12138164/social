@@ -51,16 +51,16 @@ export const NavSidebar = () => {
   const { data: profile } = useProfile();
 
   return (
-    <div className='fixed w-[275px] h-screen border-r border-border/40 px-4 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+    <div className='fixed w-[250px] h-screen border-r border-border/40 px-2 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
       <div className='flex flex-col h-full'>
         {/* Logo */}
         <Link
           href='/home'
-          className='p-4 rounded-full w-fit hover:bg-accent/80 transition-colors'
+          className='p-2 rounded-full w-fit hover:bg-accent/80 transition-colors my-1'
         >
           <svg
             viewBox='0 0 24 24'
-            className='h-8 w-8 text-primary hover:text-primary/90 transition-colors'
+            className='h-6 w-6 text-primary hover:text-primary/90 transition-colors'
           >
             <g fill='currentColor'>
               <path d='M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z'></path>
@@ -69,7 +69,7 @@ export const NavSidebar = () => {
         </Link>
 
         {/* 导航菜单 */}
-        <nav className='flex-1 space-y-1'>
+        <nav className='flex-1 py-1'>
           {navItems.map((item) => {
             const isActive = item.active.some((active) =>
               pathname.startsWith(active)
@@ -81,14 +81,14 @@ export const NavSidebar = () => {
                 <Button
                   variant='ghost'
                   className={cn(
-                    'w-full justify-start gap-4 h-12 text-lg font-medium transition-colors group relative hover:bg-accent/80',
+                    'w-full justify-start gap-2 h-9 text-base font-medium transition-colors group relative hover:bg-accent/80 px-3 my-0.5',
                     isActive ? 'text-primary font-bold' : 'hover:bg-accent/80'
                   )}
                 >
                   <div className='relative'>
                     <Icon
                       className={cn(
-                        'h-6 w-6 transition-colors',
+                        'h-5 w-5 transition-colors',
                         isActive ? 'text-primary' : 'group-hover:text-primary'
                       )}
                     />
@@ -100,7 +100,7 @@ export const NavSidebar = () => {
                   <span>{item.label}</span>
                   {/* 激活指示器 */}
                   {isActive && (
-                    <div className='absolute right-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-full' />
+                    <div className='absolute right-0 top-1/2 -translate-y-1/2 w-1 h-6 bg-primary rounded-full' />
                   )}
                 </Button>
               </Link>
@@ -109,19 +109,19 @@ export const NavSidebar = () => {
         </nav>
 
         {/* 用户信息 */}
-        <div className='flex items-center gap-3 p-4 hover:bg-accent/80 rounded-full cursor-pointer mt-auto mb-4 transition-colors group relative'>
+        <div className='flex items-center gap-2 p-2 hover:bg-accent/80 rounded-full cursor-pointer mt-auto mb-2 transition-colors group relative'>
           <UserAvatar
             src={profile?.avatar}
             alt={profile?.name || '用户'}
-            className='w-12 h-12 rounded-full bg-muted shadow-sm group-hover:ring-2 group-hover:ring-primary transition-all'
+            className='w-8 h-8 rounded-full bg-muted shadow-sm group-hover:ring-1 group-hover:ring-primary transition-all'
           />
           <div className='flex-1'>
-            <div className='font-bold group-hover:text-primary transition-colors'>
+            <div className='font-bold text-sm group-hover:text-primary transition-colors'>
               用户名
             </div>
-            <div className='text-sm text-muted-foreground'>{profile?.name}</div>
+            <div className='text-xs text-muted-foreground'>{profile?.name}</div>
           </div>
-          <MoreHorizontal className='h-5 w-5 text-muted-foreground group-hover:text-primary transition-colors' />
+          <MoreHorizontal className='h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors' />
         </div>
       </div>
     </div>

@@ -26,8 +26,10 @@ import {
   Unlock,
   X,
 } from 'lucide-react';
+import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
 
 // 图片处理相关配置
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -45,8 +47,8 @@ const compressImage = (file: File): Promise<File> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
-    reader.onload = (event) => {
-      const img = new Image();
+    reader.onload = (event: ProgressEvent<FileReader>) => {
+      const img = new HTMLImageElement();
       img.src = event.target?.result as string;
       img.onload = () => {
         // 确定压缩后的尺寸
@@ -301,106 +303,31 @@ const HomePage = () => {
 
             {/* 显示图片预览 - 多图布局 */}
             {imagePreviewUrls.length > 0 && (
-              <div className='mt-3'>
-                {/* 单图布局 */}
-                {imagePreviewUrls.length === 1 && (
+              <div className='mt-3 grid grid-cols-5 gap-2 '>
+                {imagePreviewUrls.map((url, index) => (
                   <div
-                    className='relative rounded-xl overflow-hidden bg-muted/20'
-                    style={{
-                      width: '100%',
-                      maxWidth: '500px',
-                      height: '280px',
-                    }}
+                    className='relative bg-black/5 border-2 p-2 border-border/40 flex items-center justify-center'
+                    key={index}
                   >
-                    <img
-                      src={imagePreviewUrls[0]}
-                      alt='上传预览 1'
-                      className='w-[100px] h-[100px]  object-contain'
-                    />
+                    <PhotoProvider>
+                      <PhotoView src={url}>
+                        <Image
+                          src={url}
+                          width={100}
+                          height={100}
+                          alt='上传预览'
+                          className='w-[100px] cursor-pointer h-[100px] object-contain'
+                        />
+                      </PhotoView>
+                    </PhotoProvider>
                     <button
-                      onClick={() => removeImage(0)}
-                      className='absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70'
+                      onClick={() => removeImage(index)}
+                      className='absolute cursor-pointer top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 z-10'
                     >
                       <X className='h-4 w-4' />
                     </button>
                   </div>
-                )}
-
-                {/* 双图布局 */}
-                {imagePreviewUrls.length === 2 && (
-                  <div className='grid grid-cols-2 gap-2'>
-                    {imagePreviewUrls.map((url, index) => (
-                      <div
-                        key={index}
-                        className='relative rounded-xl overflow-hidden bg-muted/20'
-                        style={{ height: '160px' }}
-                      >
-                        <img
-                          src={url}
-                          alt={`上传预览 ${index + 1}`}
-                          className='w-[100px] h-[100px] object-contain'
-                        />
-                        <button
-                          onClick={() => removeImage(index)}
-                          className='absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70'
-                        >
-                          <X className='h-4 w-4' />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* 三图布局 */}
-                {imagePreviewUrls.length === 3 && (
-                  <div className='grid grid-cols-3 gap-2'>
-                    {imagePreviewUrls.map((url, index) => (
-                      <div
-                        key={index}
-                        className='relative rounded-xl overflow-hidden bg-muted/20'
-                        style={{ height: '140px' }}
-                      >
-                        <img
-                          src={url}
-                          alt={`上传预览 ${index + 1}`}
-                          className='w-[100px] h-[100px]  object-contain'
-                        />
-                        <button
-                          onClick={() => removeImage(index)}
-                          className='absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70'
-                        >
-                          <X className='h-4 w-4' />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* 四图布局 */}
-                {imagePreviewUrls.length === 4 && (
-                  <div className='grid grid-cols-2 gap-2'>
-                    {imagePreviewUrls.map((url, index) => (
-                      <div
-                        key={index}
-                        className='relative rounded-xl overflow-hidden bg-muted/20'
-                        style={{ height: '160px' }}
-                      >
-                        <img
-                          src={url}
-                          alt={`上传预览 ${index + 1}`}
-                          className='w-[100px] h-[100px] object-contain'
-                        />
-                        <button
-                          onClick={() => removeImage(index)}
-                          className='absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70'
-                        >
-                          <X className='h-4 w-4' />
-                        </button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
+                ))}
                 <button
                   onClick={clearAllImages}
                   className='mt-2 text-sm text-muted-foreground hover:text-primary'
@@ -490,7 +417,7 @@ const HomePage = () => {
                   </Tooltip>
                 </TooltipProvider>
 
-                <TooltipProvider>
+                {/* <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -512,7 +439,7 @@ const HomePage = () => {
                       <p>{isPrivate ? '私密帖子' : '公开帖子'}</p>
                     </TooltipContent>
                   </Tooltip>
-                </TooltipProvider>
+                </TooltipProvider> */}
               </div>
               <Button
                 onClick={handleCreatePost}

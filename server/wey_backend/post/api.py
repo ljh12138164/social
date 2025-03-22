@@ -119,21 +119,37 @@ def post_list_liked(request, id):
 @api_view(['POST'])
 def post_create(request):
     form = PostForm(request.POST)
-    attachment = None
-    attachment_form = AttachmentForm(request.POST, request.FILES)
-
-    if attachment_form.is_valid():
-        attachment = attachment_form.save(commit=False)
-        attachment.created_by = request.user
-        attachment.save()
-
+    
+    # 获取附件数量
+    attachments_count = request.POST.get('attachments_count')
+    
     if form.is_valid():
         post = form.save(commit=False)
         post.created_by = request.user
         post.save()
-
-        if attachment:
-            post.attachments.add(attachment)
+        
+        # 处理多图片上传
+        if attachments_count and int(attachments_count) > 0:
+            try:
+                # 如果有传递多个图片，使用getlist获取所有图片
+                images = request.FILES.getlist('image')
+                
+                for image in images:
+                    # 为每个图片创建一个附件对象
+                    attachment_form = AttachmentForm({}, {'image': image})
+                    
+                    if attachment_form.is_valid():
+                        attachment = attachment_form.save(commit=False)
+                        attachment.created_by = request.user
+                        attachment.save()
+                        
+                        # 添加到帖子的附件中
+                        post.attachments.add(attachment)
+                    else:
+                        print(f"附件表单验证失败: {attachment_form.errors}")
+            except Exception as e:
+                print(f"处理附件时出错: {str(e)}")
+                # 错误不会中断创建帖子过程，但会记录错误
 
         user = request.user
         user.posts_count = user.posts_count + 1
@@ -143,7 +159,8 @@ def post_create(request):
 
         return JsonResponse(serializer.data, safe=False)
     else:
-        return JsonResponse({'error': 'add somehting here later!...'})
+        print(f"帖子表单验证失败: {form.errors}")
+        return JsonResponse({'error': form.errors}, status=400)
     
 
 @api_view(['POST'])

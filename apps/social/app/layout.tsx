@@ -1,8 +1,9 @@
+import { HomeContainer } from '@/container/home-contanier';
+import { Providers } from '@/provider/providers';
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import 'react-photo-view/dist/react-photo-view.css';
 import './globals.css';
-import { Providers } from '@/provider/providers';
-import { HomeContainer } from '@/container/home-contanier';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
