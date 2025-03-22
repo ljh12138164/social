@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { get, post } from '@/lib/http';
+import { del, get, post } from '@/lib/http';
 
 export interface Comment {
   id: string;
@@ -300,6 +300,34 @@ export const getTrend = () => {
     queryFn: async () => {
       const response = await get<Trend[]>('/posts/trends/');
       return response;
+    },
+  });
+};
+
+/**
+ * ### 删除帖子
+ * @param postId 帖子ID
+ * @returns 删除帖子的 mutation 函数和状态
+ */
+export const useDeletePost = (postId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await del<Post>(`/posts/${postId}/delete/`);
+      return response;
+    },
+    onSuccess: () => {
+      // 删除成功后刷新帖子列表
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['user_posts'] });
+      queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+    },
+    onError: (error: any) => {
+      console.error(
+        '删除帖子失败:',
+        error.response?.data?.message || '未知错误'
+      );
     },
   });
 };

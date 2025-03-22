@@ -1,6 +1,7 @@
 import { useInfiniteQuery, useMutation, useQuery } from '@tanstack/react-query';
 import { post } from '@/lib/http';
 import { Post } from './usePost';
+import { useSearchParams } from 'next/navigation';
 
 export interface SearchUser {
   id: string;
@@ -44,7 +45,11 @@ export const useSearch = (query: string) => {
  * @param query 搜索关键词
  * @returns 分页搜索功能的 query hook
  */
-export const useSearchPostsPaginated = (query: string) => {
+export const useSearchPostsPaginated = () => {
+  const searchParams = useSearchParams();
+  const query = searchParams.get('query')
+    ? `#${searchParams.get('query')}`
+    : '';
   return useInfiniteQuery({
     queryKey: ['search_posts_paginated', query],
     queryFn: async ({ pageParam = '1' }) => {

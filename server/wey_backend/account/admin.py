@@ -2,15 +2,15 @@ from django.contrib import admin
 from .models import User, FriendshipRequest, MibtTestResult
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('email', 'name', 'is_active', 'is_staff', 'is_superuser', 'date_joined', 'last_login')
-    list_filter = ('is_active', 'is_staff', 'is_superuser')
+    list_display = ('email', 'name', 'is_active', 'is_staff', 'is_superuser', 'is_admin', 'date_joined', 'last_login')
+    list_filter = ('is_active', 'is_staff', 'is_superuser', 'is_admin')
     search_fields = ('email', 'name')
     ordering = ('-date_joined',)
     fieldsets = (
         (None, {'fields': ('email', 'password')}),
         ('个人信息', {'fields': ('name', 'avatar', 'bio')}),
         ('社交数据', {'fields': ('friends', 'friends_count', 'posts_count')}),
-        ('权限', {'fields': ('is_active', 'is_staff', 'is_superuser')}),
+        ('权限', {'fields': ('is_active', 'is_staff', 'is_superuser', 'is_admin')}),
         ('重要日期', {'fields': ('date_joined', 'last_login')}),
     )
     readonly_fields = ('date_joined', 'last_login', 'friends_count', 'posts_count')

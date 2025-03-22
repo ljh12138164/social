@@ -150,7 +150,14 @@ export const UserProfileContainer = () => {
   return (
     <div className='min-h-screen'>
       {/* 封面图 */}
-      <div className='h-48 bg-gradient-to-r from-blue-400 to-blue-600 relative'>
+      <div
+        className='h-48 relative'
+        style={{
+          backgroundImage: `url('blackground.jpg')`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+        }}
+      >
         <div className='absolute -bottom-16 left-4 sm:left-8'>
           <UserAvatar src={user.get_avatar} alt={user.name} size='lg' />
         </div>

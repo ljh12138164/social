@@ -18,15 +18,9 @@ import { useCreatePost } from '@/http/usePost';
 import { useSearchPostsPaginated } from '@/http/useSearch';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
-import {
-  Image as ImageIcon,
-  Loader2,
-  Smile,
-  Lock,
-  Unlock,
-  X,
-} from 'lucide-react';
+import { Image as ImageIcon, Loader2, Smile, X } from 'lucide-react';
 import Image from 'next/image';
+import { useSearchParams } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { toast } from 'react-hot-toast';
 import { PhotoProvider, PhotoView } from 'react-photo-view';
@@ -110,6 +104,8 @@ const HomePage = () => {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   // const { data: posts, isLoading } = useSearch('');
+  const searchParams = useSearchParams();
+  const query = searchParams.get('query') || '';
   const createPost = useCreatePost();
   const { data: profile } = useProfile();
   const queryClient = useQueryClient();
@@ -119,7 +115,7 @@ const HomePage = () => {
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useSearchPostsPaginated('');
+  } = useSearchPostsPaginated();
 
   // 设置 IntersectionObserver 监听底部元素
   useEffect(() => {
@@ -281,196 +277,207 @@ const HomePage = () => {
     }
   };
 
+  const isQuery = query !== '';
   return (
     <>
       {/* 顶部导航 */}
-      <div className='sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/40 z-10'>
-        <div className='flex items-center justify-between p-4'>
-          <h1 className='text-xl font-bold'>首页</h1>
+      <div className='sticky top-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b border-border/40 z-10 shadow-sm'>
+        <div className='flex items-center justify-between p-4 max-w-4xl mx-auto'>
+          <h1 className='text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent'>
+            {isQuery ? `#${query}` : '首页'}
+          </h1>
         </div>
       </div>
 
       {/* 发推框 */}
-      <div className='p-4 border-b border-border/40'>
-        <div className='flex gap-4'>
-          <UserAvatar
-            src={profile?.avatar}
-            alt={profile?.name || '用户'}
-            size='md'
-          />
-          <div className='flex-1'>
-            <Tiptap ref={editorRef} onContentUpdate={handleEditorUpdate} />
+      {!isQuery && (
+        <div className='p-4 border-b border-border/40 hover:bg-accent/5 transition-colors'>
+          <div className='flex gap-4 max-w-4xl mx-auto'>
+            <UserAvatar
+              src={profile?.avatar}
+              alt={profile?.name || '用户'}
+              size='md'
+              className='transition-transform hover:scale-105'
+            />
+            <div className='flex-1 rounded-lg'>
+              <Tiptap ref={editorRef} onContentUpdate={handleEditorUpdate} />
 
-            {/* 显示图片预览 - 多图布局 */}
-            {imagePreviewUrls.length > 0 && (
-              <div className='mt-3 grid grid-cols-5 gap-2 '>
-                {imagePreviewUrls.map((url, index) => (
-                  <div
-                    className='relative bg-black/5 border-2 p-2 border-border/40 flex items-center justify-center'
-                    key={index}
-                  >
-                    <PhotoProvider>
-                      <PhotoView src={url}>
-                        <Image
-                          src={url}
-                          width={100}
-                          height={100}
-                          alt='上传预览'
-                          className='w-[100px] cursor-pointer h-[100px] object-contain'
-                        />
-                      </PhotoView>
-                    </PhotoProvider>
-                    <button
-                      onClick={() => removeImage(index)}
-                      className='absolute cursor-pointer top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 z-10'
+              {/* 显示图片预览 - 多图布局 */}
+              {imagePreviewUrls.length > 0 && (
+                <div className='mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3'>
+                  {imagePreviewUrls.map((url, index) => (
+                    <div
+                      className='relative bg-black/5 border-2 p-2 border-border/40 rounded-lg flex items-center justify-center overflow-hidden hover:border-primary/50 transition-colors'
+                      key={index}
                     >
-                      <X className='h-4 w-4' />
-                    </button>
-                  </div>
-                ))}
-                <button
-                  onClick={clearAllImages}
-                  className='mt-2 text-sm text-muted-foreground hover:text-primary'
-                >
-                  清除全部图片
-                </button>
-              </div>
-            )}
-
-            <div className='flex items-center justify-between mt-4 pt-4 border-t border-border/40'>
-              <div className='flex gap-2'>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        className={`text-primary cursor-pointer hover:bg-primary/10 transition-colors rounded-full ${
-                          postImages.length >= MAX_IMAGE_COUNT
-                            ? 'opacity-50 cursor-not-allowed'
-                            : ''
-                        }`}
-                        onClick={() => {
-                          if (
-                            postImages.length < MAX_IMAGE_COUNT &&
-                            !isProcessing
-                          ) {
-                            fileInputRef.current?.click();
-                          } else if (postImages.length >= MAX_IMAGE_COUNT) {
-                            toast.error(`最多只能上传${MAX_IMAGE_COUNT}张图片`);
-                          }
-                        }}
-                        disabled={
-                          postImages.length >= MAX_IMAGE_COUNT || isProcessing
-                        }
+                      <PhotoProvider>
+                        <PhotoView src={url}>
+                          <Image
+                            src={url}
+                            width={100}
+                            height={100}
+                            alt='上传预览'
+                            className='w-full cursor-pointer h-[100px] object-contain hover:scale-105 transition-transform'
+                          />
+                        </PhotoView>
+                      </PhotoProvider>
+                      <button
+                        onClick={() => removeImage(index)}
+                        className='absolute cursor-pointer top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70 z-10 transition-colors'
                       >
-                        {isProcessing ? (
-                          <Loader2 className='h-5 w-5 animate-spin' />
-                        ) : (
-                          <ImageIcon className='h-5 w-5' />
-                        )}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        插入图片 ({postImages.length}/{MAX_IMAGE_COUNT})
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                        <X className='h-4 w-4' />
+                      </button>
+                    </div>
+                  ))}
+                  <button
+                    onClick={clearAllImages}
+                    className='mt-2 text-sm text-muted-foreground hover:text-primary transition-colors'
+                  >
+                    清除全部图片
+                  </button>
+                </div>
+              )}
 
-                {/* 隐藏的文件输入 */}
-                <input
-                  type='file'
-                  ref={fileInputRef}
-                  className='hidden'
-                  accept='image/*'
-                  onChange={handleImageSelect}
-                  multiple
-                />
-
-                <TooltipProvider>
-                  <Tooltip>
-                    <Emoji
-                      onClick={(e) => {
-                        // 将表情插入到编辑器
-                        if (editorRef.current && editorRef.current.editor) {
-                          editorRef.current.editor.commands.insertContent(
-                            e.native
-                          );
-                        }
-                      }}
-                    >
+              <div className='flex items-center justify-between mt-4 pt-4 border-t border-border/40'>
+                <div className='flex gap-2'>
+                  <TooltipProvider>
+                    <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant='ghost'
                           size='icon'
-                          className='text-primary hover:bg-primary/10 transition-colors rounded-full'
+                          className={`text-primary cursor-pointer hover:bg-primary/10 transition-all rounded-full ${
+                            postImages.length >= MAX_IMAGE_COUNT
+                              ? 'opacity-50 cursor-not-allowed'
+                              : 'hover:scale-110 active:scale-95'
+                          }`}
+                          onClick={() => {
+                            if (
+                              postImages.length < MAX_IMAGE_COUNT &&
+                              !isProcessing
+                            ) {
+                              fileInputRef.current?.click();
+                            } else if (postImages.length >= MAX_IMAGE_COUNT) {
+                              toast.error(
+                                `最多只能上传${MAX_IMAGE_COUNT}张图片`
+                              );
+                            }
+                          }}
+                          disabled={
+                            postImages.length >= MAX_IMAGE_COUNT || isProcessing
+                          }
                         >
-                          <Smile className='h-5 w-5' />
+                          {isProcessing ? (
+                            <Loader2 className='h-5 w-5 animate-spin' />
+                          ) : (
+                            <ImageIcon className='h-5 w-5' />
+                          )}
                         </Button>
                       </TooltipTrigger>
-                    </Emoji>
-                    <TooltipContent>
-                      <p>插入表情</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                      <TooltipContent>
+                        <p>
+                          插入图片 ({postImages.length}/{MAX_IMAGE_COUNT})
+                        </p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
 
-                {/* <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant='ghost'
-                        size='icon'
-                        className={`hover:bg-primary/10 transition-colors rounded-full ${
-                          isPrivate ? 'text-primary' : 'text-muted-foreground'
-                        }`}
-                        onClick={() => setIsPrivate(!isPrivate)}
+                  {/* 隐藏的文件输入 */}
+                  <input
+                    type='file'
+                    ref={fileInputRef}
+                    className='hidden'
+                    accept='image/*'
+                    onChange={handleImageSelect}
+                    multiple
+                  />
+
+                  <TooltipProvider>
+                    <Tooltip>
+                      <Emoji
+                        onClick={(e) => {
+                          // 将表情插入到编辑器
+                          if (editorRef.current && editorRef.current.editor) {
+                            editorRef.current.editor.commands.insertContent(
+                              e.native
+                            );
+                          }
+                        }}
                       >
-                        {isPrivate ? (
-                          <Lock className='h-5 w-5' />
-                        ) : (
-                          <Unlock className='h-5 w-5' />
-                        )}
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>{isPrivate ? '私密帖子' : '公开帖子'}</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider> */}
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant='ghost'
+                            size='icon'
+                            className='text-primary hover:bg-primary/10 transition-all rounded-full hover:scale-110 active:scale-95'
+                          >
+                            <Smile className='h-5 w-5' />
+                          </Button>
+                        </TooltipTrigger>
+                      </Emoji>
+                      <TooltipContent>
+                        <p>插入表情</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+
+                  {/* <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className={`hover:bg-primary/10 transition-colors rounded-full ${
+                            isPrivate ? 'text-primary' : 'text-muted-foreground'
+                          }`}
+                          onClick={() => setIsPrivate(!isPrivate)}
+                        >
+                          {isPrivate ? (
+                            <Lock className='h-5 w-5' />
+                          ) : (
+                            <Unlock className='h-5 w-5' />
+                          )}
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{isPrivate ? '私密帖子' : '公开帖子'}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider> */}
+                </div>
+                <Button
+                  onClick={handleCreatePost}
+                  disabled={
+                    createPost.isPending || !newPost.trim() || isProcessing
+                  }
+                  className={cn(
+                    'shadow-sm hover:shadow-md transition-all px-6 rounded-full',
+                    (!newPost.trim() || isProcessing) &&
+                      'opacity-50 cursor-not-allowed',
+                    newPost.trim() &&
+                      !isProcessing &&
+                      'hover:scale-105 active:scale-95 bg-gradient-to-r from-primary to-primary/80'
+                  )}
+                >
+                  {createPost.isPending ? (
+                    <Loader2 className='h-4 w-4 animate-spin' />
+                  ) : (
+                    '发推'
+                  )}
+                </Button>
               </div>
-              <Button
-                onClick={handleCreatePost}
-                disabled={
-                  createPost.isPending || !newPost.trim() || isProcessing
-                }
-                className={cn(
-                  'shadow-sm hover:shadow-md transition-all px-6 rounded-full',
-                  (!newPost.trim() || isProcessing) &&
-                    'opacity-50 cursor-not-allowed',
-                  newPost.trim() &&
-                    !isProcessing &&
-                    'hover:scale-105 active:scale-95'
-                )}
-              >
-                {createPost.isPending ? (
-                  <Loader2 className='h-4 w-4 animate-spin' />
-                ) : (
-                  '发推'
-                )}
-              </Button>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* 帖子列表 */}
-      <div className='divide-y divide-border/40'>
+      <div className='divide-y divide-border/40 max-w-4xl mx-auto'>
         {isLoading ? (
-          <div className='flex justify-center items-center py-8'>
-            <Loader2 className='h-8 w-8 animate-spin text-primary' />
+          <div className='flex justify-center items-center py-12'>
+            <div className='flex flex-col items-center gap-3'>
+              <Loader2 className='h-10 w-10 animate-spin text-primary' />
+              <p className='text-muted-foreground animate-pulse'>加载中...</p>
+            </div>
           </div>
         ) : (
           posts?.pages.map((page) =>
@@ -487,7 +494,15 @@ const HomePage = () => {
           )}
         </div>
         <div className='flex justify-center items-center py-4'>
-          {hasNextPage ? '加载更多' : '没有更多了'}
+          {hasNextPage ? (
+            <span className='text-sm text-muted-foreground hover:text-primary transition-colors'>
+              加载更多
+            </span>
+          ) : (
+            <span className='text-sm text-muted-foreground opacity-70'>
+              没有更多了
+            </span>
+          )}
         </div>
       </div>
     </>

@@ -1,4 +1,5 @@
 'use client';
+import WordCloud from '@/components/echart/word';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useFriendSuggestions } from '@/http/useFriendship';
@@ -8,7 +9,7 @@ import { getInitials } from '@/lib/utils';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Loader2, UserPlus } from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
 // 需要显示右侧栏的页面
@@ -23,8 +24,10 @@ const SHOWN_SIDEBAR_PATHS = [
 
 export const RightSidebar = () => {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentQuery = searchParams.get('query') || '';
   const isShown = SHOWN_SIDEBAR_PATHS.includes(pathname.split('/')[1]);
-
+  const router = useRouter();
   // 好友推荐
   const { data: suggestedUsers, isLoading } = useFriendSuggestions();
   const { data: trendPosts, isLoading: isTrendLoading } = getTrend();
@@ -45,11 +48,11 @@ export const RightSidebar = () => {
       toast.error('发送好友请求失败: ' + (error.message || '未知错误'));
     },
   });
-
+  console.log(currentQuery);
   if (isShown) return null;
 
   return (
-    <div className='w-[350px] pr-[10%] hidden lg:block bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
+    <div className=' w-[350px] pr-[10%] hidden lg:block bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
       <div className='sticky top-4 space-y-4'>
         {/* 推荐用户 */}
         <div className='rounded-xl bg-muted/60 p-4 shadow-sm hover:shadow-md transition-all'>
@@ -129,12 +132,29 @@ export const RightSidebar = () => {
           ) : (
             <div className='space-y-2'>
               {trendPosts.slice(0, 5).map((trend) => (
-                <div key={trend.id} className='flex items-center gap-2'>
-                  <div className='w-1 h-6 bg-primary/20 rounded-full' />#
-                  {trend.hashtag}
-                  <span className='ml-1 text-xs opacity-60'>
-                    {trend.occurences}
-                  </span>
+                <div
+                  key={trend.id}
+                  className='flex items-center gap-2 cursor-pointer hover:bg-primary/10 transition-all rounded-md p-2'
+                  onClick={() => {
+                    if (currentQuery !== trend.hashtag) {
+                      router.push(`/home?query=${trend.hashtag}`);
+                    }
+                    if (currentQuery === trend.hashtag) {
+                      router.push(`/home`);
+                    }
+                  }}
+                >
+                  <div
+                    className={`w-1 h-6 bg-primary/20 rounded-full ${
+                      currentQuery === trend.hashtag && 'bg-primary/100'
+                    }`}
+                  />
+                  <div className='flex flex-col'>
+                    <span>#{trend.hashtag}</span>
+                    <span className='ml-1 text-xs opacity-60'>
+                      帖子数：{trend.occurences}
+                    </span>
+                  </div>
                 </div>
               ))}
             </div>

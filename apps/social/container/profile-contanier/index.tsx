@@ -18,12 +18,12 @@ import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProfile } from '@/http/useAuth';
 import { useUserLikes, useUserProfile } from '@/http/useProfile';
+import { personalityLabels } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
 import { UserAvatar } from './UserAvatar';
-import { personalityLabels } from '@/lib/utils';
 
 export { ProfileEditForm } from './ProfileEditForm';
 
@@ -44,7 +44,16 @@ export const ProfileContainer = () => {
   return (
     <div className='min-h-screen'>
       {/* 封面图 */}
-      <div className='h-48 bg-gradient-to-r  from-blue-400 to-blue-600 relative'>
+      <div className='h-68 relative'>
+        <div
+          className='absolute top-0 left-0 w-full h-full'
+          style={{
+            backgroundImage: `url('/blackground.jpg')`,
+            backgroundSize: 'cover',
+            backgroundPosition: 'bottom',
+          }}
+        />
+
         <div className='absolute -bottom-16 left-4 sm:left-8'>
           <UserAvatar src={profile.avatar} alt={profile.name} size='lg' />
         </div>
@@ -289,7 +298,7 @@ export const ProfileContainer = () => {
                 userPosts.data.posts &&
                 userPosts.data.posts.length > 0 ? (
                 userPosts.data.posts.map((post) => (
-                  <PostItem key={post.id} post={post} />
+                  <PostItem canDelete key={post.id} post={post} />
                 ))
               ) : (
                 <div className='py-12 text-center text-muted-foreground'>

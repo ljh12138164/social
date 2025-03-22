@@ -3,14 +3,22 @@ from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password
 
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import IsAdminUser
+from rest_framework.permissions import IsAdminUser, BasePermission
 
 from .models import User, FriendshipRequest, MibtTestResult
 from .serializers import UserSerializer
 
 
+class IsAdminPermission(BasePermission):
+    """
+    自定义权限类，检查用户是否有is_admin权限
+    """
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated and request.user.is_admin
+
+
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminPermission])
 def admin_users_list(request):
     """获取所有用户列表，仅限管理员访问"""
     search = request.GET.get('search', '')
@@ -32,13 +40,18 @@ def admin_users_list(request):
     
     serializer = UserSerializer(users, many=True)
     
+    # 为每个用户添加创建时间
+    user_data = serializer.data
+    for user in user_data:
+        user['created_at'] = User.objects.get(id=user['id']).date_joined
+    
     return JsonResponse({
-        'users': serializer.data
+        'users': user_data
     })
 
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminPermission])
 def admin_user_detail(request, user_id):
     """获取特定用户详情，仅限管理员访问"""
     user = get_object_or_404(User, id=user_id)
@@ -70,7 +83,7 @@ def admin_user_detail(request, user_id):
 
 
 @api_view(['POST'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminPermission])
 def admin_create_user(request):
     """创建新用户，仅限管理员访问"""
     data = request.data
@@ -89,7 +102,8 @@ def admin_create_user(request):
         password=make_password(data.get('password')),
         is_active=data.get('is_active', True),
         is_staff=data.get('is_staff', False),
-        is_superuser=data.get('is_superuser', False)
+        is_superuser=data.get('is_superuser', False),
+        is_admin=data.get('is_admin', False)
     )
     
     serializer = UserSerializer(user)
@@ -101,7 +115,7 @@ def admin_create_user(request):
 
 
 @api_view(['PUT'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminPermission])
 def admin_update_user(request, user_id):
     """更新用户信息，仅限管理员访问"""
     user = get_object_or_404(User, id=user_id)
@@ -130,6 +144,9 @@ def admin_update_user(request, user_id):
         
     if 'is_superuser' in data:
         user.is_superuser = data['is_superuser']
+        
+    if 'is_admin' in data:
+        user.is_admin = data['is_admin']
     
     # 如果提供了新密码，则更新密码
     if 'password' in data and data['password']:
@@ -146,18 +163,13 @@ def admin_update_user(request, user_id):
 
 
 @api_view(['DELETE'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminPermission])
 def admin_delete_user(request, user_id):
     """删除用户，仅限管理员访问"""
     user = get_object_or_404(User, id=user_id)
     
-    # 删除用户(保存邮箱，防止将来重新注册)
-    user.is_active = False
-    user.email = f"deleted_{user.email}"
-    user.save()
-    
-    # 如果需要物理删除用户，请使用以下代码
-    # user.delete()
+    # 物理删除用户
+    user.delete()
     
     return JsonResponse({
         'success': True,
@@ -166,7 +178,7 @@ def admin_delete_user(request, user_id):
 
 
 @api_view(['GET'])
-@permission_classes([IsAdminUser])
+@permission_classes([IsAdminPermission])
 def admin_user_statistics(request):
     """获取用户统计信息，仅限管理员访问"""
     total_users = User.objects.count()
@@ -174,6 +186,7 @@ def admin_user_statistics(request):
     inactive_users = User.objects.filter(is_active=False).count()
     staff_users = User.objects.filter(is_staff=True).count()
     superusers = User.objects.filter(is_superuser=True).count()
+    admin_users = User.objects.filter(is_admin=True).count()
     
     # 获取最近注册的用户
     recent_users = User.objects.order_by('-date_joined')[:5]
@@ -193,6 +206,28 @@ def admin_user_statistics(request):
         'inactive_users': inactive_users,
         'staff_users': staff_users,
         'superusers': superusers,
+        'admin_users': admin_users,
         'recent_users': recent_users_serializer.data,
         'mbti_statistics': mbti_stats
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminPermission])
+def admin_toggle_admin_status(request, user_id):
+    """切换用户的管理员状态，仅限管理员访问"""
+    user = get_object_or_404(User, id=user_id)
+    data = request.data
+    
+    # 切换管理员状态
+    is_admin = data.get('is_admin', not user.is_admin)
+    user.is_admin = is_admin
+    user.save()
+    
+    serializer = UserSerializer(user)
+    
+    return JsonResponse({
+        'success': True,
+        'message': f"用户管理员状态已更新为: {'管理员' if is_admin else '普通用户'}",
+        'user': serializer.data
     }) 

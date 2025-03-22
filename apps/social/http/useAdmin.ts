@@ -8,12 +8,11 @@ export interface User {
   get_avatar: string;
   bio: string;
   is_active: boolean;
-  is_staff: boolean;
-  is_superuser: boolean;
   friends_count: number;
   posts_count: number;
   date_joined: string;
-  last_login: string;
+  created_at: string;
+  is_admin: boolean;
 }
 
 export interface UserDetail extends User {
@@ -69,7 +68,7 @@ export const useAdminUsersList = (
   isActive?: boolean,
   isStaff?: boolean
 ) => {
-  let url = '/api/account/admin/users/';
+  let url = '/admin/users/';
   const params = new URLSearchParams();
 
   if (search) params.append('search', search);
@@ -96,9 +95,7 @@ export const useAdminUserStatistics = () => {
   return useQuery<UserStatistics>({
     queryKey: ['admin', 'users', 'stats'],
     queryFn: async () => {
-      const response = await get<UserStatistics>(
-        '/api/account/admin/users/stats/'
-      );
+      const response = await get<UserStatistics>('/admin/users/stats/');
       return response;
     },
   });
@@ -121,7 +118,7 @@ export const useAdminUserDetail = (userId: string) => {
         user: User;
         friendship_requests: { received: number; sent: number };
         mibt_result: any;
-      }>(`/api/account/admin/users/${userId}/`);
+      }>(`/admin/users/${userId}/`);
       return response;
     },
     enabled: !!userId,
@@ -138,7 +135,7 @@ export const useAdminCreateUser = () => {
   return useMutation({
     mutationFn: async (data: CreateUserData) => {
       const response = await post<{ success: boolean; user: User }>(
-        '/api/account/admin/users/create/',
+        '/admin/users/create/',
         data
       );
       return response;
@@ -168,7 +165,7 @@ export const useAdminUpdateUser = (userId: string) => {
   return useMutation({
     mutationFn: async (data: UpdateUserData) => {
       const response = await put<{ success: boolean; user: User }>(
-        `/api/account/admin/users/${userId}/update/`,
+        `/admin/users/${userId}/update/`,
         data
       );
       return response;
@@ -199,7 +196,7 @@ export const useAdminDeleteUser = (userId: string) => {
   return useMutation({
     mutationFn: async () => {
       const response = await del<{ success: boolean; message: string }>(
-        `/api/account/admin/users/${userId}/delete/`
+        `/admin/users/${userId}/delete/`
       );
       return response;
     },

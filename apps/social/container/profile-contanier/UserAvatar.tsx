@@ -9,6 +9,7 @@ interface UserAvatarProps {
   alt: string;
   size?: 'sm' | 'md' | 'lg';
   className?: string;
+  onClick?: () => void;
 }
 
 const sizeMap = {
@@ -22,22 +23,26 @@ export const UserAvatar = ({
   alt,
   size = 'md',
   className,
+  onClick,
 }: UserAvatarProps) => {
   const avatarUrl = src || AVATAR_URL;
 
   return (
     <div
       className={cn(
-        'rounded-full border-4 border-background bg-muted relative overflow-hidden',
+        'rounded-full border-4 border-background bg-muted relative overflow-hidden shadow-sm',
+        'hover:shadow-md transition-all duration-200',
+        onClick && 'cursor-pointer',
         sizeMap[size],
         className
       )}
+      onClick={onClick}
     >
       <Image
         src={avatarUrl}
         alt={alt}
         fill
-        className='object-cover'
+        className='object-cover transition-transform duration-300 hover:scale-110'
         sizes='(max-width: 128px) 100vw, 128px'
       />
     </div>

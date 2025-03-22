@@ -28,4 +28,5 @@ urlpatterns = [
     path('admin/users/<uuid:user_id>/', admin_api.admin_user_detail, name='admin_user_detail'),
     path('admin/users/<uuid:user_id>/update/', admin_api.admin_update_user, name='admin_update_user'),
     path('admin/users/<uuid:user_id>/delete/', admin_api.admin_delete_user, name='admin_delete_user'),
+    path('admin/users/<uuid:user_id>/toggle-admin/', admin_api.admin_toggle_admin_status, name='admin_toggle_admin_status'),
 ]

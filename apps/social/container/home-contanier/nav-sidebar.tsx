@@ -1,6 +1,14 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { Home, Search, Bell, Mail, User, MoreHorizontal } from 'lucide-react';
+import {
+  Home,
+  Search,
+  Bell,
+  Mail,
+  User,
+  MoreHorizontal,
+  TrendingUp,
+} from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -25,6 +33,12 @@ const navItems = [
     icon: Search,
     href: '/explore',
     active: ['/explore'],
+  },
+  {
+    label: '趋势',
+    icon: TrendingUp,
+    href: '/trends',
+    active: ['/trends'],
   },
   {
     label: '通知',

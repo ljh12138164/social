@@ -28,6 +28,7 @@ interface Profile {
   avatar?: string;
   bio?: string;
   mbti_result: MBTIResult | null;
+  is_admin?: boolean;
 }
 
 /**

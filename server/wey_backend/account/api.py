@@ -26,13 +26,15 @@ def me(request):
     except MibtTestResult.DoesNotExist:
         mibt_data = None
     
+    print(user.is_admin)
     return JsonResponse({
         'id': user.id,
         'name': user.name,
         'email': user.email,
         'avatar': user.get_avatar(),
         'bio': user.bio,
-        'mbti_result': mibt_data
+        'mbti_result': mibt_data,
+        'is_admin': user.is_admin,
     })
 
 
