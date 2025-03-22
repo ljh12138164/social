@@ -49,8 +49,7 @@ export const RightSidebar = () => {
   if (isShown) return null;
 
   return (
-    <div className='w-[350px] p-4 hidden lg:block bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
-      {/* 搜索框 */}
+    <div className='w-[350px] pr-[10%] hidden lg:block bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60'>
       <div className='sticky top-4 space-y-4'>
         {/* 推荐用户 */}
         <div className='rounded-xl bg-muted/60 p-4 shadow-sm hover:shadow-md transition-all'>
@@ -111,6 +110,33 @@ export const RightSidebar = () => {
                   查看更多推荐用户
                 </Link>
               )}
+            </div>
+          )}
+        </div>
+
+        {/* 热门话题 */}
+        <div className='rounded-xl bg-muted/60 p-4 shadow-sm hover:shadow-md transition-all'>
+          <h2 className='text-xl font-bold mb-4'>热门话题</h2>
+
+          {isTrendLoading ? (
+            <div className='py-8 flex justify-center'>
+              <Loader2 className='h-6 w-6 animate-spin text-primary' />
+            </div>
+          ) : !trendPosts || trendPosts.length === 0 ? (
+            <div className='py-4 text-center text-muted-foreground'>
+              暂无热门话题
+            </div>
+          ) : (
+            <div className='space-y-2'>
+              {trendPosts.slice(0, 5).map((trend) => (
+                <div key={trend.id} className='flex items-center gap-2'>
+                  <div className='w-1 h-6 bg-primary/20 rounded-full' />#
+                  {trend.hashtag}
+                  <span className='ml-1 text-xs opacity-60'>
+                    {trend.occurences}
+                  </span>
+                </div>
+              ))}
             </div>
           )}
         </div>

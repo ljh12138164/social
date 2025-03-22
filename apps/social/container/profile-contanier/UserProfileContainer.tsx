@@ -1,5 +1,6 @@
 'use client';
 
+import { PostItem } from '@/components/PostItem';
 import {
   Accordion,
   AccordionContent,
@@ -7,25 +8,21 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useProfile } from '@/http/useAuth';
 import { useCreateOrGetConversation } from '@/http/useChat';
-import { Post } from '@/http/usePost';
 import {
   useSendFriendRequest,
-  useUserProfile,
   useUserLikes,
+  useUserProfile,
 } from '@/http/useProfile';
+import { personalityLabels } from '@/lib/utils';
 import { Loader2, Mail, UserCheck, UserPlus } from 'lucide-react';
-import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { UserAvatar } from './UserAvatar';
-import { Progress } from '@/components/ui/progress';
-import { personalityLabels } from '@/lib/utils';
-import Image from 'next/image';
-import { PostItem } from '@/components/PostItem';
 
 // // 帖子项组件
 // const PostItem = ({ post }: { post: Post }) => {
@@ -167,21 +164,6 @@ export const UserProfileContainer = () => {
             <p className='text-muted-foreground'>{user.email}</p>
           </div>
           <div className='flex gap-2'>
-            <Button
-              size='sm'
-              variant='outline'
-              className='rounded-full'
-              onClick={handleSendMessage}
-              disabled={isCreatingChat}
-            >
-              {isCreatingChat ? (
-                <Loader2 className='h-4 w-4 animate-spin mr-2' />
-              ) : (
-                <Mail className='h-4 w-4 mr-2' />
-              )}
-              发消息
-            </Button>
-
             {can_send_friendship_request ? (
               <Button
                 size='sm'

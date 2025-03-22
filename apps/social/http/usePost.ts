@@ -286,14 +286,19 @@ export const useLikeComment = (postId: string, commentId: string) => {
   });
 };
 
+interface Trend {
+  id: number;
+  hashtag: string;
+  occurences: number;
+}
 /**
  * ### 获取趋势
  */
 export const getTrend = () => {
-  return useQuery<Post[]>({
+  return useQuery<Trend[]>({
     queryKey: ['trend'],
     queryFn: async () => {
-      const response = await get<Post[]>('/posts/trends/');
+      const response = await get<Trend[]>('/posts/trends/');
       return response;
     },
   });
