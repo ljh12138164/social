@@ -41,7 +41,8 @@ export interface Post {
 
 interface CreatePostData {
   body: string;
-  attachment?: File;
+  attachments?: File[];
+  is_private?: boolean;
 }
 
 /**
@@ -70,8 +71,21 @@ export const useCreatePost = () => {
       const formData = new FormData();
       formData.append('body', data.body);
 
-      if (data.attachment) {
-        formData.append('attachment', data.attachment);
+      // 添加is_private参数，默认为false
+      formData.append('is_private', data.is_private ? 'true' : 'false');
+
+      if (data.attachments && data.attachments.length > 0) {
+        // 后端可能需要知道有多少图片
+        formData.append(
+          'attachments_count',
+          data.attachments.length.toString()
+        );
+
+        // 添加多个图片 - 每个图片使用同一个字段名称
+        // 这样后端可以使用request.FILES.getlist('image')来获取所有图片
+        data.attachments.forEach((file) => {
+          formData.append('image', file);
+        });
       }
 
       const response = await post<Post>('/posts/create/', formData, {

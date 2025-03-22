@@ -2,7 +2,7 @@
   "name": "wey_backend",
   "scripts": {
     "dev": "npm-run-all --parallel dev:web dev:trends",
-    "dev:web":"py manage.py runserver",
+    "dev:web":"py manage.py runserver 0.0.0.0:8000",
     "dev:trends":"py scripts/schedule_tasks.py",
     "postinstall": "py -m pip install -r requirements.txt && py manage.py migrate"
   },

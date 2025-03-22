@@ -11,6 +11,7 @@ interface HomeContainerProps {
 export const HomeContainer = ({ children }: HomeContainerProps) => {
   const pathname = usePathname();
   const router = useRouter();
+
   if (pathname === '/') router.push('/home');
   const isAuth = pathname.startsWith('/auth');
   if (isAuth) return children;

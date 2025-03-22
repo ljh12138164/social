@@ -4,6 +4,12 @@ import Emoji from '@/components/ChatEmoji';
 import { PostItem } from '@/components/PostItem';
 import Tiptap, { TiptapRef } from '@/components/Rich/Tiptap';
 import { Button } from '@/components/ui/button';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 // import { Textarea } from '@/components/ui/textarea';
 import { withAuth } from '@/container/auth-contanier/AuthContainer';
 import { UserAvatar } from '@/container/profile-contanier/UserAvatar';
@@ -12,11 +18,91 @@ import { useCreatePost } from '@/http/usePost';
 import { useSearchPostsPaginated } from '@/http/useSearch';
 import { cn } from '@/lib/utils';
 import { useQueryClient } from '@tanstack/react-query';
-import { Image, Loader2, Smile } from 'lucide-react';
+import {
+  Image as ImageIcon,
+  Loader2,
+  Smile,
+  Lock,
+  Unlock,
+  X,
+} from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import { toast } from 'react-hot-toast';
+
+// 图片处理相关配置
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_IMAGE_COUNT = 4; // 最多上传4张图片
+const COMPRESSION_QUALITY = 0.7; // 压缩质量
+const ALLOWED_IMAGE_TYPES = [
+  'image/jpeg',
+  'image/png',
+  'image/gif',
+  'image/webp',
+]; // 允许的图片类型
+
+// 压缩图片函数
+const compressImage = (file: File): Promise<File> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        // 确定压缩后的尺寸
+        let width = img.width;
+        let height = img.height;
+        const maxDimension = 1200; // 最大尺寸
+
+        if (width > height && width > maxDimension) {
+          height = Math.round((height * maxDimension) / width);
+          width = maxDimension;
+        } else if (height > maxDimension) {
+          width = Math.round((width * maxDimension) / height);
+          height = maxDimension;
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+
+        // 转换为Blob
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error('Canvas to Blob conversion failed'));
+              return;
+            }
+            // 创建新的File对象
+            const compressedFile = new File([blob], file.name, {
+              type: 'image/jpeg',
+              lastModified: Date.now(),
+            });
+            resolve(compressedFile);
+          },
+          'image/jpeg',
+          COMPRESSION_QUALITY
+        );
+      };
+      img.onerror = () => {
+        reject(new Error('Image loading error'));
+      };
+    };
+    reader.onerror = () => {
+      reject(new Error('File reading error'));
+    };
+  });
+};
 
 const HomePage = () => {
   const [newPost, setNewPost] = useState('');
+  const [postImages, setPostImages] = useState<File[]>([]);
+  const [imagePreviewUrls, setImagePreviewUrls] = useState<string[]>([]);
+  const [isPrivate, setIsPrivate] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const editorRef = useRef<TiptapRef | null>(null);
   const observerRef = useRef<IntersectionObserver | null>(null);
   const loadMoreRef = useRef<HTMLDivElement>(null);
@@ -62,16 +148,28 @@ const HomePage = () => {
   const handleCreatePost = () => {
     if (!newPost.trim()) return;
     createPost.mutate(
-      { body: newPost },
+      {
+        body: newPost,
+        attachments: postImages.length > 0 ? postImages : undefined,
+        is_private: isPrivate,
+      },
       {
         onSuccess: (data) => {
           setNewPost('');
+          setPostImages([]);
+          setImagePreviewUrls([]);
+          setIsPrivate(false);
           queryClient.invalidateQueries({
             queryKey: ['search_posts_paginated', ''],
           });
           if (editorRef.current && editorRef.current.editor) {
             editorRef.current.editor.commands.clearContent();
           }
+          toast.success('发布成功！');
+        },
+        onError: (error) => {
+          console.error(error);
+          toast.error('发布失败，请稍后重试');
         },
       }
     );
@@ -80,6 +178,105 @@ const HomePage = () => {
   // 处理编辑器内容更新
   const handleEditorUpdate = (content: string) => {
     setNewPost(content);
+  };
+
+  // 处理图片选择
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // 检查是否超过最大数量限制
+    if (postImages.length + files.length > MAX_IMAGE_COUNT) {
+      toast.error(`最多只能上传${MAX_IMAGE_COUNT}张图片`);
+      return;
+    }
+
+    setIsProcessing(true);
+
+    try {
+      const newImages: File[] = [];
+      const newPreviewUrls: string[] = [];
+
+      // 处理每一个文件
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i];
+
+        // 文件类型检查
+        if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+          toast.error(
+            `${file.name} 格式不支持，请上传 JPG、PNG、GIF 或 WebP 格式图片`
+          );
+          continue;
+        }
+
+        // 文件大小检查
+        if (file.size > MAX_FILE_SIZE) {
+          toast(`图片 ${file.name} 较大，正在压缩...`);
+          try {
+            // 尝试压缩图片
+            const compressedFile = await compressImage(file);
+            if (compressedFile.size > MAX_FILE_SIZE) {
+              toast.error(
+                `图片 ${file.name} 太大，即使压缩后仍超过 ${
+                  MAX_FILE_SIZE / 1024 / 1024
+                }MB`
+              );
+              continue;
+            }
+            newImages.push(compressedFile);
+            newPreviewUrls.push(URL.createObjectURL(compressedFile));
+            toast.success(`图片 ${file.name} 压缩成功`);
+          } catch (error) {
+            toast.error(`图片 ${file.name} 太大，无法处理`);
+            console.error('压缩失败:', error);
+          }
+        } else {
+          // 小于限制大小的图片直接添加
+          newImages.push(file);
+          newPreviewUrls.push(URL.createObjectURL(file));
+        }
+      }
+
+      // 更新状态
+      setPostImages((prev) => [...prev, ...newImages]);
+      setImagePreviewUrls((prev) => [...prev, ...newPreviewUrls]);
+    } catch (error) {
+      console.error('处理图片时出错:', error);
+      toast.error('处理图片时出错，请重试');
+    } finally {
+      setIsProcessing(false);
+      // 清空input值，允许再次选择相同文件
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
+  // 删除单个图片
+  const removeImage = (index: number) => {
+    const newImages = [...postImages];
+    const newPreviewUrls = [...imagePreviewUrls];
+
+    // 清除预览URL以避免内存泄漏
+    URL.revokeObjectURL(newPreviewUrls[index]);
+
+    newImages.splice(index, 1);
+    newPreviewUrls.splice(index, 1);
+
+    setPostImages(newImages);
+    setImagePreviewUrls(newPreviewUrls);
+  };
+
+  // 清除所有图片选择
+  const clearAllImages = () => {
+    // 清除所有预览URL
+    imagePreviewUrls.forEach((url) => URL.revokeObjectURL(url));
+
+    setPostImages([]);
+    setImagePreviewUrls([]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
@@ -101,39 +298,234 @@ const HomePage = () => {
           />
           <div className='flex-1'>
             <Tiptap ref={editorRef} onContentUpdate={handleEditorUpdate} />
+
+            {/* 显示图片预览 - 多图布局 */}
+            {imagePreviewUrls.length > 0 && (
+              <div className='mt-3'>
+                {/* 单图布局 */}
+                {imagePreviewUrls.length === 1 && (
+                  <div
+                    className='relative rounded-xl overflow-hidden bg-muted/20'
+                    style={{
+                      width: '100%',
+                      maxWidth: '500px',
+                      height: '280px',
+                    }}
+                  >
+                    <img
+                      src={imagePreviewUrls[0]}
+                      alt='上传预览 1'
+                      className='w-[100px] h-[100px]  object-contain'
+                    />
+                    <button
+                      onClick={() => removeImage(0)}
+                      className='absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70'
+                    >
+                      <X className='h-4 w-4' />
+                    </button>
+                  </div>
+                )}
+
+                {/* 双图布局 */}
+                {imagePreviewUrls.length === 2 && (
+                  <div className='grid grid-cols-2 gap-2'>
+                    {imagePreviewUrls.map((url, index) => (
+                      <div
+                        key={index}
+                        className='relative rounded-xl overflow-hidden bg-muted/20'
+                        style={{ height: '160px' }}
+                      >
+                        <img
+                          src={url}
+                          alt={`上传预览 ${index + 1}`}
+                          className='w-[100px] h-[100px] object-contain'
+                        />
+                        <button
+                          onClick={() => removeImage(index)}
+                          className='absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70'
+                        >
+                          <X className='h-4 w-4' />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 三图布局 */}
+                {imagePreviewUrls.length === 3 && (
+                  <div className='grid grid-cols-3 gap-2'>
+                    {imagePreviewUrls.map((url, index) => (
+                      <div
+                        key={index}
+                        className='relative rounded-xl overflow-hidden bg-muted/20'
+                        style={{ height: '140px' }}
+                      >
+                        <img
+                          src={url}
+                          alt={`上传预览 ${index + 1}`}
+                          className='w-[100px] h-[100px]  object-contain'
+                        />
+                        <button
+                          onClick={() => removeImage(index)}
+                          className='absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70'
+                        >
+                          <X className='h-4 w-4' />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* 四图布局 */}
+                {imagePreviewUrls.length === 4 && (
+                  <div className='grid grid-cols-2 gap-2'>
+                    {imagePreviewUrls.map((url, index) => (
+                      <div
+                        key={index}
+                        className='relative rounded-xl overflow-hidden bg-muted/20'
+                        style={{ height: '160px' }}
+                      >
+                        <img
+                          src={url}
+                          alt={`上传预览 ${index + 1}`}
+                          className='w-[100px] h-[100px] object-contain'
+                        />
+                        <button
+                          onClick={() => removeImage(index)}
+                          className='absolute top-2 right-2 bg-black/50 text-white rounded-full p-1 hover:bg-black/70'
+                        >
+                          <X className='h-4 w-4' />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  onClick={clearAllImages}
+                  className='mt-2 text-sm text-muted-foreground hover:text-primary'
+                >
+                  清除全部图片
+                </button>
+              </div>
+            )}
+
             <div className='flex items-center justify-between mt-4 pt-4 border-t border-border/40'>
               <div className='flex gap-2'>
-                <Button
-                  variant='ghost'
-                  size='icon'
-                  className='text-primary hover:bg-primary/10 transition-colors rounded-full'
-                >
-                  <Image className='h-5 w-5' />
-                </Button>
-                <Emoji
-                  onClick={(e) => {
-                    // 将表情插入到编辑器
-                    if (editorRef.current && editorRef.current.editor) {
-                      editorRef.current.editor.commands.insertContent(e.native);
-                    }
-                  }}
-                >
-                  <Button
-                    variant='ghost'
-                    size='icon'
-                    className='text-primary hover:bg-primary/10 transition-colors rounded-full'
-                  >
-                    <Smile className='h-5 w-5' />
-                  </Button>
-                </Emoji>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        className={`text-primary cursor-pointer hover:bg-primary/10 transition-colors rounded-full ${
+                          postImages.length >= MAX_IMAGE_COUNT
+                            ? 'opacity-50 cursor-not-allowed'
+                            : ''
+                        }`}
+                        onClick={() => {
+                          if (
+                            postImages.length < MAX_IMAGE_COUNT &&
+                            !isProcessing
+                          ) {
+                            fileInputRef.current?.click();
+                          } else if (postImages.length >= MAX_IMAGE_COUNT) {
+                            toast.error(`最多只能上传${MAX_IMAGE_COUNT}张图片`);
+                          }
+                        }}
+                        disabled={
+                          postImages.length >= MAX_IMAGE_COUNT || isProcessing
+                        }
+                      >
+                        {isProcessing ? (
+                          <Loader2 className='h-5 w-5 animate-spin' />
+                        ) : (
+                          <ImageIcon className='h-5 w-5' />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>
+                        插入图片 ({postImages.length}/{MAX_IMAGE_COUNT})
+                      </p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                {/* 隐藏的文件输入 */}
+                <input
+                  type='file'
+                  ref={fileInputRef}
+                  className='hidden'
+                  accept='image/*'
+                  onChange={handleImageSelect}
+                  multiple
+                />
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <Emoji
+                      onClick={(e) => {
+                        // 将表情插入到编辑器
+                        if (editorRef.current && editorRef.current.editor) {
+                          editorRef.current.editor.commands.insertContent(
+                            e.native
+                          );
+                        }
+                      }}
+                    >
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant='ghost'
+                          size='icon'
+                          className='text-primary hover:bg-primary/10 transition-colors rounded-full'
+                        >
+                          <Smile className='h-5 w-5' />
+                        </Button>
+                      </TooltipTrigger>
+                    </Emoji>
+                    <TooltipContent>
+                      <p>插入表情</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant='ghost'
+                        size='icon'
+                        className={`hover:bg-primary/10 transition-colors rounded-full ${
+                          isPrivate ? 'text-primary' : 'text-muted-foreground'
+                        }`}
+                        onClick={() => setIsPrivate(!isPrivate)}
+                      >
+                        {isPrivate ? (
+                          <Lock className='h-5 w-5' />
+                        ) : (
+                          <Unlock className='h-5 w-5' />
+                        )}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>{isPrivate ? '私密帖子' : '公开帖子'}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
               <Button
                 onClick={handleCreatePost}
-                disabled={createPost.isPending || !newPost.trim()}
+                disabled={
+                  createPost.isPending || !newPost.trim() || isProcessing
+                }
                 className={cn(
                   'shadow-sm hover:shadow-md transition-all px-6 rounded-full',
-                  !newPost.trim() && 'opacity-50 cursor-not-allowed',
-                  newPost.trim() && 'hover:scale-105 active:scale-95'
+                  (!newPost.trim() || isProcessing) &&
+                    'opacity-50 cursor-not-allowed',
+                  newPost.trim() &&
+                    !isProcessing &&
+                    'hover:scale-105 active:scale-95'
                 )}
               >
                 {createPost.isPending ? (
