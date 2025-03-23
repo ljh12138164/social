@@ -16,6 +16,7 @@ import { useProfile, useLogout } from '@/http/useAuth';
 import { cn } from '@/lib/utils';
 import {
   Activity,
+  ChartLine,
   File,
   Flag,
   LogOut,
@@ -65,6 +66,19 @@ const AdminContainer = ({ children }: { children?: React.ReactNode }) => {
                 className={cn(
                   'w-full justify-start cursor-pointer px-6 py-2.5 mb-1 transition-colors',
                   activePath === 'home'
+                    ? 'bg-purple-light text-purple font-medium'
+                    : 'hover:bg-gray-50 text-gray-700'
+                )}
+              >
+                <ChartLine className='mr-3 h-5 w-5' />
+                <span>管理员仪表盘</span>
+              </SidebarMenuButton>
+              <SidebarMenuButton
+                isActive={activePath === 'user'}
+                onClick={() => router.push('/admin/user')}
+                className={cn(
+                  'w-full justify-start cursor-pointer px-6 py-2.5 mb-1 transition-colors',
+                  activePath === 'user'
                     ? 'bg-purple-light text-purple font-medium'
                     : 'hover:bg-gray-50 text-gray-700'
                 )}

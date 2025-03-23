@@ -552,3 +552,213 @@ export const useAdminReportDetail = (reportId: string) => {
     enabled: !!reportId,
   });
 };
+
+// 可视化相关接口定义
+export interface DateCount {
+  date: string;
+  count: number;
+}
+
+export interface MonthCount {
+  month: string;
+  count: number;
+}
+
+export interface CategoryCount {
+  category: string;
+  count: number;
+}
+
+export interface PublicPrivateRatio {
+  public: number;
+  private: number;
+}
+
+export interface ActiveInactiveRatio {
+  active: number;
+  inactive: number;
+}
+
+export interface NetworkNode {
+  id: string;
+  name: string;
+  group: number;
+}
+
+export interface NetworkLink {
+  source: string;
+  target: string;
+  value: number;
+}
+
+export interface NetworkVisualization {
+  nodes: NetworkNode[];
+  links: NetworkLink[];
+}
+
+export interface UserStatistics {
+  users_by_date: DateCount[];
+  active_vs_inactive: ActiveInactiveRatio;
+  personality_distribution: CategoryCount[];
+  total_users: number;
+}
+
+export interface PostStatistics {
+  posts_by_date: DateCount[];
+  top_liked_posts: Post[];
+  top_commented_posts: Post[];
+  public_vs_private: PublicPrivateRatio;
+  top_trends: { hashtag: string; occurences: number }[];
+  total_posts: number;
+}
+
+export interface InteractionStatistics {
+  likes_by_month: MonthCount[];
+  comments_by_month: MonthCount[];
+  friend_requests_by_month: MonthCount[];
+  friendship_status: { status: string; count: number }[];
+  total_likes: number;
+  total_comments: number;
+}
+
+export interface UserActivitySummary {
+  posts_by_date: DateCount[];
+  received_likes: number;
+  comments_made: number;
+  likes_given: number;
+  friends_count: number;
+  total_posts: number;
+}
+
+export interface AdminDashboardWeeklyStats {
+  week_start: string;
+  week_end: string;
+  new_users: number;
+  new_posts: number;
+  new_likes: number;
+  new_comments: number;
+}
+
+export interface AdminDashboardSummary {
+  total_users: number;
+  new_users_30d: number;
+  total_posts: number;
+  new_posts_30d: number;
+  total_likes: number;
+  new_likes_30d: number;
+  total_comments: number;
+  new_comments_30d: number;
+  total_reports: number;
+  new_reports_30d: number;
+}
+
+export interface AdminDashboardAverages {
+  avg_posts_per_user: number;
+  avg_likes_per_post: number;
+  avg_comments_per_post: number;
+  user_activity_rate: number;
+}
+
+export interface AdminDashboardTopUsers {
+  most_active: { id: string; name: string; posts_count: number }[];
+  most_popular: { id: string; name: string; likes_received: number }[];
+}
+
+export interface AdminDashboard {
+  summary: AdminDashboardSummary;
+  averages: AdminDashboardAverages;
+  weekly_stats: AdminDashboardWeeklyStats[];
+  top_users: AdminDashboardTopUsers;
+}
+
+/**
+ * ### 获取管理员仪表盘数据
+ * @returns 管理员仪表盘数据查询结果
+ */
+export const useAdminDashboard = () => {
+  return useQuery<AdminDashboard>({
+    queryKey: ['admin', 'dashboard'],
+    queryFn: async () => {
+      const response = await get<AdminDashboard>(
+        '/visualization/admin/dashboard/'
+      );
+      return response;
+    },
+  });
+};
+
+/**
+ * ### 获取用户统计可视化数据
+ * @returns 用户统计可视化数据查询结果
+ */
+export const useUserStatisticsVisualization = () => {
+  return useQuery<UserStatistics>({
+    queryKey: ['visualization', 'users', 'stats'],
+    queryFn: async () => {
+      const response = await get<UserStatistics>('/visualization/users/stats/');
+      return response;
+    },
+  });
+};
+
+/**
+ * ### 获取帖子统计可视化数据
+ * @returns 帖子统计可视化数据查询结果
+ */
+export const usePostStatisticsVisualization = () => {
+  return useQuery<PostStatistics>({
+    queryKey: ['visualization', 'posts', 'stats'],
+    queryFn: async () => {
+      const response = await get<PostStatistics>('/visualization/posts/stats/');
+      return response;
+    },
+  });
+};
+
+/**
+ * ### 获取互动统计可视化数据
+ * @returns 互动统计可视化数据查询结果
+ */
+export const useInteractionStatisticsVisualization = () => {
+  return useQuery<InteractionStatistics>({
+    queryKey: ['visualization', 'interactions', 'stats'],
+    queryFn: async () => {
+      const response = await get<InteractionStatistics>(
+        '/visualization/interactions/stats/'
+      );
+      return response;
+    },
+  });
+};
+
+/**
+ * ### 获取用户活动概览
+ * @returns 用户活动概览查询结果
+ */
+export const useUserActivitySummary = () => {
+  return useQuery<UserActivitySummary>({
+    queryKey: ['visualization', 'user', 'activity'],
+    queryFn: async () => {
+      const response = await get<UserActivitySummary>(
+        '/visualization/user/activity/'
+      );
+      return response;
+    },
+  });
+};
+
+/**
+ * ### 获取用户社交网络可视化数据
+ * @returns 用户社交网络可视化数据查询结果
+ */
+export const useUserNetworkVisualization = () => {
+  return useQuery<NetworkVisualization>({
+    queryKey: ['visualization', 'user', 'network'],
+    queryFn: async () => {
+      const response = await get<NetworkVisualization>(
+        '/visualization/user/network/'
+      );
+      return response;
+    },
+  });
+};
