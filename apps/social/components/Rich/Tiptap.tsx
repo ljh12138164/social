@@ -100,7 +100,6 @@ export interface TiptapRef {
   editor: Editor | null;
 }
 
-// 使用forwardRef包装组件
 const Tiptap = ({
   onContentUpdate,
   ref,

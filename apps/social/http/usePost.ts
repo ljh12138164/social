@@ -45,6 +45,19 @@ interface CreatePostData {
   is_private?: boolean;
 }
 
+export interface PostReport {
+  id: string;
+  post: Post;
+  reported_by: {
+    id: string;
+    name: string;
+    get_avatar: string;
+  };
+  reason: string;
+  created_at: string;
+  created_at_formatted: string;
+}
+
 /**
  * ### 获取帖子列表
  * @returns 帖子列表数据和加载状态
@@ -307,6 +320,30 @@ export const useDeletePost = (postId: string) => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['user_posts'] });
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
+    },
+  });
+};
+
+/**
+ * ### 举报帖子
+ * @param postId 帖子ID
+ * @returns 举报帖子的 mutation 函数和状态
+ */
+export const useReportPost = (postId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (data: { reason: string }) => {
+      const response = await post<{ message: string; report: PostReport }>(
+        `/posts/${postId}/report/`,
+        data
+      );
+      return response;
+    },
+    onSuccess: () => {
+      // 举报成功后，可能需要刷新某些查询
+      queryClient.invalidateQueries({ queryKey: ['posts'] });
+      queryClient.invalidateQueries({ queryKey: ['post', postId] });
     },
   });
 };

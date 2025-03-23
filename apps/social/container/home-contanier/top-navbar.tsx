@@ -64,15 +64,15 @@ export const TopNavbar = () => {
 
   return (
     <div className='fixed top-0 left-0 w-[100dvw] h-16 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10'>
-      <div className='h-full w-full grid grid-cols-[150px_1fr_50px]  relative'>
+      <div className='h-full w-full grid grid-cols-[300px_1fr_300px]  relative'>
         {/* 左侧Logo部分 */}
         <div className='flex items-center h-full '>
           <Link href='/home' className='flex items-center h-full'>
             <Image
               src='/logo.webp'
               alt='社交网站Logo'
-              width={200}
-              height={200}
+              width={180}
+              height={180}
               className='ml-4'
             />
           </Link>
@@ -124,7 +124,7 @@ export const TopNavbar = () => {
         </div>
 
         {/* 右侧用户头像部分 */}
-        <div className='flex items-center h-full'>
+        <div className='flex items-center h-full justify-end pr-10'>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className='cursor-pointer'>

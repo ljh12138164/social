@@ -69,3 +69,18 @@ class Post(models.Model):
 class Trend(models.Model):
     hashtag = models.CharField(max_length=255)
     occurences = models.IntegerField()
+
+
+class PostReport(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    post = models.ForeignKey(Post, related_name='reports', on_delete=models.CASCADE)
+    reported_by = models.ForeignKey(User, related_name='post_reports', on_delete=models.CASCADE)
+    reason = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        ordering = ('-created_at',)
+        unique_together = ('post', 'reported_by')  # 确保每个用户对同一帖子只能举报一次
+    
+    def created_at_formatted(self):
+        return timesince(self.created_at)

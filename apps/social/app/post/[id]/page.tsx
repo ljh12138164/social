@@ -16,7 +16,7 @@ import {
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { ArrowLeft, Heart, Loader2, MessageSquare, Share2 } from 'lucide-react';
+import { ArrowLeft, Heart, Loader2, MessageSquare } from 'lucide-react';
 import Image from 'next/image';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -244,13 +244,6 @@ const PostPage = () => {
                 >
                   {post.likes_count}
                 </span>
-              </Button>
-              <Button
-                variant='ghost'
-                size='sm'
-                className='flex items-center gap-2 hover:text-blue-500 hover:bg-blue-500/10 transition-colors rounded-full group'
-              >
-                <Share2 className='h-5 w-5 transition-transform group-hover:scale-110' />
               </Button>
             </div>
           </div>

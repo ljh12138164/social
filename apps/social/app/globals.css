@@ -23,6 +23,134 @@
     0px 3.618px 9.949px 0px rgba(0, 0, 0, 0.04);
 }
 
+@layer base {
+  :root {
+    --background: hsl(0 0% 100%);
+    --foreground: hsl(240 10% 3.9%);
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(240 10% 3.9%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(240 10% 3.9%);
+    --primary: hsl(142, 79%, 31%);
+    --primary-foreground: hsl(355.7 100% 97.3%);
+    --secondary: hsl(240 4.8% 95.9%);
+    --secondary-foreground: hsl(240 5.9% 10%);
+    --muted: hsl(240 4.8% 95.9%);
+    --muted-foreground: hsl(240 3.8% 46.1%);
+    --accent: hsl(240 4.8% 95.9%);
+    --accent-foreground: hsl(240 5.9% 10%);
+    --destructive: hsl(0 84.2% 60.2%);
+    --destructive-foreground: hsl(0 0% 98%);
+    --border: hsl(240 5.9% 90%);
+    --input: hsl(240 5.9% 90%);
+    --ring: hsl(142.1 76.2% 36.3%);
+    --radius: 0.5rem;
+    /* 分析家(NT): 紫色系 */
+    --chart-1: hsl(270 70% 50%); /* INTJ - 深紫色 */
+    --chart-2: hsl(280 65% 55%); /* INTP - 亮紫色 */
+    --chart-3: hsl(260 75% 45%); /* ENTJ - 皇家紫 */
+    --chart-4: hsl(290 60% 60%); /* ENTP - 淡紫色 */
+
+    /* 外交家(NF): 绿色系 */
+    --chart-5: hsl(120 65% 45%); /* INFJ - 森林绿 */
+    --chart-6: hsl(140 60% 50%); /* INFP - 翡翠绿 */
+    --chart-7: hsl(160 70% 40%); /* ENFJ - 深绿色 */
+    --chart-8: hsl(100 55% 55%); /* ENFP - 草绿色 */
+
+    /* 守卫者(SJ): 蓝色系 */
+    --chart-9: hsl(220 70% 45%); /* ISTJ - 深蓝色 */
+    --chart-10: hsl(200 65% 50%); /* ISFJ - 天蓝色 */
+    --chart-11: hsl(240 75% 40%); /* ESTJ - 皇家蓝 */
+    --chart-12: hsl(180 60% 55%); /* ESFJ - 青蓝色 */
+
+    /* 探索者(SP): 橙色系 */
+    --chart-13: hsl(20 75% 50%); /* ISTP - 深橙色 */
+    --chart-14: hsl(30 70% 55%); /* ISFP - 亮橙色 */
+    --chart-15: hsl(40 65% 45%); /* ESTP - 金橙色 */
+    --chart-16: hsl(10 60% 60%); /* ESFP - 红橙色 */
+
+    --sidebar-background: hsl(0 0% 98%);
+    --sidebar-foreground: hsl(240 5.3% 26.1%);
+    --sidebar-primary: hsl(240 5.9% 10%);
+    --sidebar-primary-foreground: hsl(0 0% 98%);
+    --sidebar-accent: hsl(240 4.8% 95.9%);
+    --sidebar-accent-foreground: hsl(240 5.9% 10%);
+    --sidebar-border: hsl(220 13% 91%);
+    --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  }
+
+  .dark {
+    --background: hsl(20 14.3% 4.1%);
+    --foreground: hsl(0 0% 95%);
+    --card: hsl(24 9.8% 10%);
+    --card-foreground: hsl(0 0% 95%);
+    --popover: hsl(0 0% 9%);
+    --popover-foreground: hsl(0 0% 95%);
+    --primary: hsl(142.1 70.6% 45.3%);
+    --primary-foreground: hsl(144.9 80.4% 10%);
+    --secondary: hsl(240 3.7% 15.9%);
+    --secondary-foreground: hsl(0 0% 98%);
+    --muted: hsl(0 0% 15%);
+    --muted-foreground: hsl(240 5% 64.9%);
+    --accent: hsl(12 6.5% 15.1%);
+    --accent-foreground: hsl(0 0% 98%);
+    --destructive: hsl(0 62.8% 30.6%);
+    --destructive-foreground: hsl(0 85.7% 97.3%);
+    --border: hsl(240 3.7% 15.9%);
+    --input: hsl(240 3.7% 15.9%);
+    --ring: hsl(142.4 71.8% 29.2%);
+
+    --sidebar-background: hsl(240 5.9% 10%);
+    --sidebar-foreground: hsl(240 4.8% 95.9%);
+    --sidebar-primary: hsl(224.3 76.3% 48%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(240 3.7% 15.9%);
+    --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
+    --sidebar-border: hsl(240 3.7% 15.9%);
+    --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* 全局动画和过渡效果 */
+  button,
+  a,
+  input,
+  textarea,
+  select {
+    transition: all 0.2s ease;
+  }
+
+  /* 添加平滑滚动 */
+  html {
+    scroll-behavior: smooth;
+  }
+
+  /* 图片悬停效果 */
+  img {
+    transition: transform 0.3s ease;
+  }
+
+  /* 按钮点击效果 */
+  button:active:not(:disabled) {
+    transform: scale(0.97);
+  }
+
+  /* 焦点状态增强 */
+  *:focus-visible {
+    outline: 2px solid hsl(var(--primary) / 0.5);
+    outline-offset: 2px;
+  }
+}
+
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
@@ -82,115 +210,6 @@
     to {
       height: 0;
     }
-  }
-}
-
-@layer base {
-  :root {
-    --background: hsl(0 0% 100%);
-    --foreground: hsl(240 10% 3.9%);
-    --card: hsl(0 0% 100%);
-    --card-foreground: hsl(240 10% 3.9%);
-    --popover: hsl(0 0% 100%);
-    --popover-foreground: hsl(240 10% 3.9%);
-    --primary: hsl(142, 79%, 31%);
-    --primary-foreground: hsl(355.7 100% 97.3%);
-    --secondary: hsl(240 4.8% 95.9%);
-    --secondary-foreground: hsl(240 5.9% 10%);
-    --muted: hsl(240 4.8% 95.9%);
-    --muted-foreground: hsl(240 3.8% 46.1%);
-    --accent: hsl(240 4.8% 95.9%);
-    --accent-foreground: hsl(240 5.9% 10%);
-    --destructive: hsl(0 84.2% 60.2%);
-    --destructive-foreground: hsl(0 0% 98%);
-    --border: hsl(240 5.9% 90%);
-    --input: hsl(240 5.9% 90%);
-    --ring: hsl(142.1 76.2% 36.3%);
-    --radius: 0.5rem;
-    /* 分析家(NT): 紫色系 */
-    --chart-1: hsl(270 70% 50%); /* INTJ - 深紫色 */
-    --chart-2: hsl(280 65% 55%); /* INTP - 亮紫色 */
-    --chart-3: hsl(260 75% 45%); /* ENTJ - 皇家紫 */
-    --chart-4: hsl(290 60% 60%); /* ENTP - 淡紫色 */
-
-    /* 外交家(NF): 绿色系 */
-    --chart-5: hsl(120 65% 45%); /* INFJ - 森林绿 */
-    --chart-6: hsl(140 60% 50%); /* INFP - 翡翠绿 */
-    --chart-7: hsl(160 70% 40%); /* ENFJ - 深绿色 */
-    --chart-8: hsl(100 55% 55%); /* ENFP - 草绿色 */
-
-    /* 守卫者(SJ): 蓝色系 */
-    --chart-9: hsl(220 70% 45%); /* ISTJ - 深蓝色 */
-    --chart-10: hsl(200 65% 50%); /* ISFJ - 天蓝色 */
-    --chart-11: hsl(240 75% 40%); /* ESTJ - 皇家蓝 */
-    --chart-12: hsl(180 60% 55%); /* ESFJ - 青蓝色 */
-
-    /* 探索者(SP): 橙色系 */
-    --chart-13: hsl(20 75% 50%); /* ISTP - 深橙色 */
-    --chart-14: hsl(30 70% 55%); /* ISFP - 亮橙色 */
-    --chart-15: hsl(40 65% 45%); /* ESTP - 金橙色 */
-    --chart-16: hsl(10 60% 60%); /* ESFP - 红橙色 */
-  }
-
-  .dark {
-    --background: hsl(20 14.3% 4.1%);
-    --foreground: hsl(0 0% 95%);
-    --card: hsl(24 9.8% 10%);
-    --card-foreground: hsl(0 0% 95%);
-    --popover: hsl(0 0% 9%);
-    --popover-foreground: hsl(0 0% 95%);
-    --primary: hsl(142.1 70.6% 45.3%);
-    --primary-foreground: hsl(144.9 80.4% 10%);
-    --secondary: hsl(240 3.7% 15.9%);
-    --secondary-foreground: hsl(0 0% 98%);
-    --muted: hsl(0 0% 15%);
-    --muted-foreground: hsl(240 5% 64.9%);
-    --accent: hsl(12 6.5% 15.1%);
-    --accent-foreground: hsl(0 0% 98%);
-    --destructive: hsl(0 62.8% 30.6%);
-    --destructive-foreground: hsl(0 85.7% 97.3%);
-    --border: hsl(240 3.7% 15.9%);
-    --input: hsl(240 3.7% 15.9%);
-    --ring: hsl(142.4 71.8% 29.2%);
-  }
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
-
-  /* 全局动画和过渡效果 */
-  button,
-  a,
-  input,
-  textarea,
-  select {
-    transition: all 0.2s ease;
-  }
-
-  /* 添加平滑滚动 */
-  html {
-    scroll-behavior: smooth;
-  }
-
-  /* 图片悬停效果 */
-  img {
-    transition: transform 0.3s ease;
-  }
-
-  /* 按钮点击效果 */
-  button:active:not(:disabled) {
-    transform: scale(0.97);
-  }
-
-  /* 焦点状态增强 */
-  *:focus-visible {
-    outline: 2px solid hsl(var(--primary) / 0.5);
-    outline-offset: 2px;
   }
 }
 

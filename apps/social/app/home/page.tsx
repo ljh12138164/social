@@ -447,7 +447,7 @@ const HomePage = () => {
                     createPost.isPending || !newPost.trim() || isProcessing
                   }
                   className={cn(
-                    'shadow-sm hover:shadow-md transition-all px-6 rounded-full',
+                    'shadow-sm hover:shadow-md transition-all px-6 rounded',
                     (!newPost.trim() || isProcessing) &&
                       'opacity-50 cursor-not-allowed',
                     newPost.trim() &&
@@ -458,7 +458,7 @@ const HomePage = () => {
                   {createPost.isPending ? (
                     <Loader2 className='h-4 w-4 animate-spin' />
                   ) : (
-                    '发推'
+                    '发布'
                   )}
                 </Button>
               </div>

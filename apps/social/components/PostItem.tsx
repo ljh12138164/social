@@ -1,17 +1,23 @@
 'use client';
 
 import { UserAvatar } from '@/container/profile-contanier/UserAvatar';
-import { Post, useDeletePost, useLikePost } from '@/http/usePost';
+import {
+  Post,
+  useDeletePost,
+  useLikePost,
+  useReportPost,
+} from '@/http/usePost';
 import { cn } from '@/lib/utils';
+import { AlertDialogCancel } from '@radix-ui/react-alert-dialog';
 import { format } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
-import { Heart, MessageSquare, Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
-import Render from './Rich/Render';
-import { Button } from './ui/button';
-import { Separator } from './ui/separator';
-import { PhotoProvider, PhotoView } from 'react-photo-view';
+import { Flag, Heart, MessageSquare, Trash2 } from 'lucide-react';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { toast } from 'react-hot-toast';
+import { PhotoProvider, PhotoView } from 'react-photo-view';
+import Render from './Rich/Render';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,7 +28,9 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from './ui/alert-dialog';
-import { AlertDialogCancel } from '@radix-ui/react-alert-dialog';
+import { Button } from './ui/button';
+import { Separator } from './ui/separator';
+import { Textarea } from './ui/textarea';
 
 export const PostItem = ({
   post,
@@ -32,18 +40,41 @@ export const PostItem = ({
   canDelete?: boolean;
 }) => {
   const { mutate: likePost } = useLikePost(post.id);
+  const { mutate: reportPost, isPending: isReporting } = useReportPost(post.id);
   const router = useRouter();
   const { mutate: deletePost } = useDeletePost(post.id);
+  const [reportReason, setReportReason] = useState('');
+
+  const handleReport = () => {
+    if (!reportReason.trim()) {
+      toast.error('请填写举报原因');
+      return;
+    }
+
+    reportPost(
+      { reason: reportReason },
+      {
+        onSuccess: (data) => {
+          toast.success(data.message || '举报成功');
+          setReportReason(''); // 重置表单
+        },
+        onError: (error) => {
+          toast.error('举报失败，请稍后重试');
+        },
+      }
+    );
+  };
+
   return (
     <>
       <div
         onClick={() => {
           router.push(`/post/${post.id}`);
         }}
-        className='p-4 hover:bg-accent/30 cursor-pointer transition-all duration-200'
+        className='p-4 m-5 hover:bg-accent/30 cursor-pointer transition-all duration-200'
       >
         <div className='flex gap-4'>
-          <div className='w-10 h-10 rounded-full bg-muted shadow-sm overflow-hidden group'>
+          <div className='w-13 h-13 rounded-full bg-muted shadow-sm overflow-hidden group'>
             {post.created_by.get_avatar && (
               <UserAvatar
                 src={post.created_by.get_avatar}
@@ -52,7 +83,7 @@ export const PostItem = ({
               />
             )}
           </div>
-          <div className='flex-1 space-y-2'>
+          <div className='flex-1'>
             <div className='flex items-center gap-2'>
               <span className='font-bold hover:underline cursor-pointer hover:text-primary transition-colors'>
                 {post.created_by.name}
@@ -61,12 +92,12 @@ export const PostItem = ({
                 @{post.created_by.email}
               </span>
               <span className='text-muted-foreground'>·</span>
-              <span className='text-muted-foreground hover:underline cursor-pointer ml-auto text-sm'>
-                {format(new Date(post.created_at), 'PP', {
-                  locale: zhCN,
-                })}
-              </span>
             </div>
+            <span className='text-muted-foreground hover:underline cursor-pointer ml-auto text-xs pb-10'>
+              {format(new Date(post.created_at), 'PP', {
+                locale: zhCN,
+              })}
+            </span>
             <div className='text-[15px] leading-relaxed'>
               <Render data={post.body} />
             </div>
@@ -133,6 +164,61 @@ export const PostItem = ({
                     {post.likes_count || ''}
                   </span>
                 </Button>
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={(e) => {
+                        e.stopPropagation();
+                      }}
+                      className='flex items-center gap-1 hover:text-orange-500 hover:bg-orange-500/10 transition-all duration-200 rounded-full hover:scale-105 active:scale-95'
+                    >
+                      <Flag className='h-4 w-4' />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent onClick={(e) => e.stopPropagation()}>
+                    <AlertDialogHeader>
+                      <AlertDialogTitle>举报内容</AlertDialogTitle>
+                      <AlertDialogDescription>
+                        请详细描述您举报的原因，管理员会尽快处理您的举报。
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <div className='mt-2'>
+                      <Textarea
+                        placeholder='请输入举报原因...'
+                        value={reportReason}
+                        onChange={(e) => setReportReason(e.target.value)}
+                        className='min-h-[100px] resize-none'
+                      />
+                    </div>
+                    <AlertDialogFooter className='mt-4'>
+                      <AlertDialogCancel asChild>
+                        <Button
+                          variant='outline'
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setReportReason('');
+                          }}
+                        >
+                          取消
+                        </Button>
+                      </AlertDialogCancel>
+                      <AlertDialogAction asChild>
+                        <Button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReport();
+                          }}
+                          disabled={isReporting || !reportReason.trim()}
+                          className='bg-orange-500 hover:bg-orange-700 transition-all duration-200'
+                        >
+                          {isReporting ? '提交中...' : '提交举报'}
+                        </Button>
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
                 {canDelete && (
                   <AlertDialog>
                     <AlertDialogTrigger asChild>

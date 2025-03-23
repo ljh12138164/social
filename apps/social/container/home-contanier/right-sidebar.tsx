@@ -51,12 +51,13 @@ export const RightSidebar = () => {
   if (isShown) return null;
 
   return (
-    <div className=' w-[350px] pr-[10%] hidden bg-gray-100 lg:block  backdrop-blur'>
-      <div className='sticky top-4 space-y-4'>
+    <div className=' w-[300px] pr-[10%] hidden bg-gray-100 lg:block  backdrop-blur'>
+      <div className='sticky top-4 space-y-4 mt-5'>
         {/* 推荐用户 */}
         <Card className='rounded-xl  p-4 shadow-sm hover:shadow-md transition-all'>
           <CardContent className='p-0'>
             <p className='text-xl font-bold mb-4'>推荐用户</p>
+            <hr className='mb-3' />
             {isLoading ? (
               <div className='py-8 flex justify-center'>
                 <Loader2 className='h-6 w-6 animate-spin text-primary' />
@@ -80,12 +81,12 @@ export const RightSidebar = () => {
                     <div className='flex-1'>
                       <Link
                         href={`/profile/${user.id}`}
-                        className='font-bold group-hover:text-primary transition-colors'
+                        className='font-bold group-hover:text-primary transition-colors text-sm'
                       >
                         {user.name}
                       </Link>
-                      <div className='text-sm text-muted-foreground'>
-                        {user.posts_count} 帖子
+                      <div className='text-muted-foreground text-xs'>
+                        帖子数 {user.posts_count}
                       </div>
                     </div>
                     <Button
@@ -123,6 +124,7 @@ export const RightSidebar = () => {
         <Card className='rounded-xl  p-4 shadow-sm hover:shadow-md transition-all'>
           <CardContent className='p-0'>
             <p className='text-xl font-bold mb-4'>话题</p>
+            <hr className='mb-3' />
             {isTrendLoading ? (
               <div className='py-8 flex justify-center'>
                 <Loader2 className='h-6 w-6 animate-spin text-primary' />
@@ -160,7 +162,7 @@ export const RightSidebar = () => {
                           {trend.hashtag}
                         </div>
                         <div className='text-sm text-muted-foreground'>
-                          {trend.occurences} 条动态
+                          {trend.occurences} 篇帖子
                         </div>
                       </div>
                     </div>

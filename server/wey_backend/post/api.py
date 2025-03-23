@@ -11,8 +11,8 @@ from account.serializers import UserSerializer
 from notification.utils import create_notification
 
 from .forms import PostForm, AttachmentForm
-from .models import Post, Like, Comment, Trend
-from .serializers import PostSerializer, PostDetailSerializer, CommentSerializer, TrendSerializer
+from .models import Post, Like, Comment, Trend, PostReport
+from .serializers import PostSerializer, PostDetailSerializer, CommentSerializer, TrendSerializer, PostReportSerializer
 
 
 @api_view(['GET'])
@@ -218,11 +218,40 @@ def post_delete(request, pk):
 
 @api_view(['POST'])
 def post_report(request, pk):
-    post = Post.objects.get(pk=pk)
-    post.reported_by_users.add(request.user)
-    post.save()
-
-    return JsonResponse({'message': 'post reported'})
+    try:
+        post = Post.objects.get(pk=pk)
+        
+        # 验证请求数据
+        if not request.data.get('reason'):
+            return JsonResponse({'error': '请提供举报原因'}, status=400)
+        
+        # 检查用户是否已经举报过该帖子
+        if post.reported_by_users.filter(id=request.user.id).exists():
+            # 更新现有举报
+            report = PostReport.objects.get(post=post, reported_by=request.user)
+            report.reason = request.data.get('reason')
+            report.save()
+            message = '举报已更新'
+        else:
+            # 创建新举报记录
+            report = PostReport.objects.create(
+                post=post,
+                reported_by=request.user,
+                reason=request.data.get('reason')
+            )
+            # 添加到报告用户列表（保持向后兼容）
+            post.reported_by_users.add(request.user)
+            post.save()
+            message = '举报已提交'
+            
+            # 可以在这里添加通知管理员的代码
+        
+        return JsonResponse({
+            'message': message,
+            'report': PostReportSerializer(report, context={'request': request}).data
+        })
+    except Post.DoesNotExist:
+        return JsonResponse({'error': '帖子不存在'}, status=404)
 
 
 @api_view(['GET'])

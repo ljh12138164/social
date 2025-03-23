@@ -126,7 +126,6 @@ export const MessageInput = ({
         <Button
           onClick={handleSend}
           disabled={!message.trim() || disabled}
-          className='h-10 bg-green-500 hover:bg-green-600 transition-colors px-4 rounded-xl'
           aria-label='发送消息'
         >
           <Send className='h-4 w-4 mr-2' />

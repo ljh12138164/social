@@ -1,12 +1,13 @@
 import { CozeAPI } from '@coze/api';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { useState } from 'react';
 import { toast } from 'react-hot-toast';
 
 // 创建API客户端
 const apiClient = new CozeAPI({
-  token: 'pat_6bEv5mYTx9EeJoRWiP4tXq2PG0W6up16OLQBd3SliJwoThVEULL5K4N9viihizDD',
-  baseURL: 'https://api.coze.cn',
+  token: process.env.NEXT_PUBLIC_COZE_API_KEY as string,
+  baseURL: process.env.NEXT_PUBLIC_COZE_API_URL as string,
+  allowPersonalAccessTokenInBrowser: true,
 });
 
 // 消息类型定义
@@ -38,26 +39,49 @@ export const useAiChat = () => {
   const [streamResponse, setStreamResponse] = useState<string>('');
 
   // 流式响应处理函数
-  const handleStreamResponse = async (
-    stream: any,
-    callbacks?: StreamCallbacks
-  ) => {
+  const handleStreamResponse = async (stream: any) => {
     let fullResponse = '';
-
     try {
       for await (const chunk of stream) {
-        if (chunk) {
-          fullResponse += chunk;
-          setStreamResponse(fullResponse);
-          callbacks?.onChunk?.(chunk);
+        if (chunk && chunk.event) {
+          // 处理消息事件，提取AI返回的内容
+          if (chunk.event === 'Message' && chunk.data) {
+            try {
+              const data =
+                typeof chunk.data === 'string'
+                  ? JSON.parse(chunk.data)
+                  : chunk.data;
+              // 图片中显示data.content是字符串形式的JSON对象
+              if (data.content) {
+                try {
+                  const contentData = JSON.parse(data.content);
+                  // 图片中显示结构为{"output":"..."}
+                  if (contentData.output) {
+                    // 处理输出内容，包括可能的换行符
+                    fullResponse += contentData.output;
+                    setStreamResponse(fullResponse);
+                  }
+                } catch (e) {}
+              }
+            } catch {}
+          }
+          // 处理Done事件，提取debug_url
+          else if (chunk.event === 'Done') {
+            try {
+              const dataObj =
+                typeof chunk.data === 'string'
+                  ? JSON.parse(chunk.data)
+                  : chunk.data;
+              if (dataObj && dataObj.debug_url) {
+              }
+            } catch {}
+          }
         }
       }
 
-      callbacks?.onComplete?.(fullResponse);
       return fullResponse;
     } catch (error) {
       const err = error as Error;
-      callbacks?.onError?.(err);
       toast.error('处理AI响应流失败: ' + (err.message || '未知错误'));
       throw err;
     }
@@ -65,17 +89,17 @@ export const useAiChat = () => {
 
   const mutation = useMutation({
     mutationFn: async ({ params }: { params: AiRequestParams }) => {
-      const response = await apiClient.workflows.runs.stream({
+      const response = apiClient.workflows.runs.stream({
         workflow_id: '7484823801077219369',
         parameters: params,
       });
 
-      return response;
+      return handleStreamResponse(response);
     },
-    onSuccess: (data) => {
-      // 返回流式消息
-      return handleStreamResponse(data);
-    },
+    // onSuccess: (data) => {
+    //   // 返回流式消息
+    //   console.log('流式消息:', data);
+    // },
     onError: (error: Error) => {
       toast.error('AI聊天请求失败: ' + (error.message || '未知错误'));
     },
@@ -84,5 +108,6 @@ export const useAiChat = () => {
   return {
     ...mutation,
     streamResponse,
+    setStreamResponse,
   };
 };

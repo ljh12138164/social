@@ -11,3 +11,4 @@ drf-yasg==1.21.7
 schedule==1.2.0
 python-dotenv==1.0.0
 beautifulsoup4==4.12.2
+better-profanity==0.7.0

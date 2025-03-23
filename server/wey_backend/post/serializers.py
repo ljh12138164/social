@@ -2,7 +2,7 @@ from rest_framework import serializers
 
 from account.serializers import UserSerializer
 
-from .models import Post, PostAttachment, Comment, Trend
+from .models import Post, PostAttachment, Comment, Trend, PostReport
 
 
 class PostAttachmentSerializer(serializers.ModelSerializer):
@@ -63,3 +63,12 @@ class TrendSerializer(serializers.ModelSerializer):
     class Meta:
         model = Trend
         fields = ('id', 'hashtag', 'occurences',)
+
+
+class PostReportSerializer(serializers.ModelSerializer):
+    reported_by = UserSerializer(read_only=True)
+    post = PostSerializer(read_only=True)
+
+    class Meta:
+        model = PostReport
+        fields = ('id', 'post', 'reported_by', 'reason', 'created_at', 'created_at_formatted')
