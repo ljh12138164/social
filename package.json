@@ -6,6 +6,7 @@
     "build": "turbo build",
     "dev": "turbo dev",
     "dev:social": "turbo dev --filter=social --filter=social-socket --filter=wey_backend",
+    "build:social": "turbo build --filter=social --filter=social-socket --filter=wey_backend",
     "lint:all": "turbo lint",
     "lint": "biome check --fix --unsafe && biome lint .&& pnpm run lint:all"
   },

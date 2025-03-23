@@ -2,8 +2,8 @@
 
 import { withAuth } from '@/container/auth-contanier/AuthContainer';
 
-const HomePage = ({ children }: { children: React.ReactNode }) => {
-  return children;
+const HomePage = () => {
+  return <></>;
 };
 
 // 使用 withAuth 高阶组件包装页面组件
