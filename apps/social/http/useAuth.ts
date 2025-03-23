@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { post, get } from '@/lib/http';
 import { useRouter } from 'next/navigation';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 import { MBTIResult } from '@/container/mibt-contanier/MBTITest';
 
 export interface TokenResponse {

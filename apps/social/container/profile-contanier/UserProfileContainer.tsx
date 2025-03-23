@@ -21,7 +21,7 @@ import { personalityLabels } from '@/lib/utils';
 import { Loader2, Mail, UserCheck, UserPlus } from 'lucide-react';
 import { useParams, useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 import { UserAvatar } from './UserAvatar';
 
 // // 帖子项组件

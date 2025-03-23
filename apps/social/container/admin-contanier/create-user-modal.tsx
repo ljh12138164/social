@@ -10,7 +10,7 @@ import {
 import { useAdminCreateUser } from '@/http/useAdmin';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 import * as z from 'zod';
 
 // 表单验证规则

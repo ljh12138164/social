@@ -15,6 +15,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
 import { Label } from '../../components/ui/label';
+import Link from 'next/link';
 
 const profileSchema = z.object({
   name: z.string().min(2, '名字至少需要2个字符'),
@@ -169,20 +170,25 @@ export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
           </div>
 
           <div className='sticky bottom-0 bg-background/80 backdrop-blur-sm py-4 -mx-8 px-8 border-t mt-6'>
-            <Button
-              type='submit'
-              disabled={updateProfile.isPending}
-              className='w-full rounded-full bg-blue-500 hover:bg-blue-600 text-white font-medium'
-            >
-              {updateProfile.isPending ? (
-                <>
-                  <Loader2 className='w-4 h-4 mr-2 animate-spin' />
-                  保存中...
-                </>
-              ) : (
-                '保存修改'
-              )}
-            </Button>
+            <section className='flex items-center justify-between gap-4'>
+              <Button variant='outline' asChild className='flex-1'>
+                <Link href='/profile'>返回</Link>
+              </Button>
+              <Button
+                type='submit'
+                disabled={updateProfile.isPending}
+                className='flex-1 text-white font-medium'
+              >
+                {updateProfile.isPending ? (
+                  <>
+                    <Loader2 className='w-4 h-4 mr-2 animate-spin' />
+                    保存中...
+                  </>
+                ) : (
+                  '保存修改'
+                )}
+              </Button>
+            </section>
           </div>
         </form>
       </ScrollArea>

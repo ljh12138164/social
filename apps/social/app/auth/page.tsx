@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 import { useAuthCheck } from '@/http/useAuth';
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
+import Image from 'next/image';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -45,9 +46,15 @@ export default function AuthPage() {
         <div className='bg-white dark:bg-gray-900 rounded-3xl shadow-2xl overflow-hidden'>
           {/* Logo 和品牌区域 */}
           <div className='text-center py-8 px-6 bg-gradient-to-b from-white to-gray-50 dark:from-gray-900 dark:to-gray-800 border-b border-gray-100 dark:border-gray-800'>
-            <h1 className='text-3xl font-bold bg-gradient-to-r from-blue-600 to-blue-400 bg-clip-text text-transparent'>
-              社交平台
-            </h1>
+            <div className='flex justify-center'>
+              <Image
+                src='/logo.webp'
+                alt='社交平台Logo'
+                width={180}
+                height={180}
+                className='mb-2'
+              />
+            </div>
             <p className='text-gray-600 dark:text-gray-400 text-sm mt-2'>
               {isLogin ? '欢迎回来' : '创建您的账号'}
             </p>
@@ -62,7 +69,7 @@ export default function AuthPage() {
                 className={cn(
                   'px-6 py-2 rounded-full text-sm transition-all duration-200',
                   isLogin
-                    ? 'bg-white dark:bg-gray-700 text-blue-600 dark:text-blue-400 shadow-sm'
+                    ? 'bg-white dark:bg-gray-700  shadow-sm'
                     : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200'
                 )}
               >
@@ -99,25 +106,7 @@ export default function AuthPage() {
           </div>
 
           {/* 底部切换提示 */}
-          <div className='px-6 pb-6 text-center'>
-            <div className='relative'>
-              <div className='absolute inset-0 flex items-center'>
-                <div className='w-full border-t border-gray-200 dark:border-gray-800'></div>
-              </div>
-              <div className='relative flex justify-center text-sm'>
-                <span className='px-2 bg-white dark:bg-gray-900 text-gray-500 dark:text-gray-400'>
-                  {isLogin ? '还没有账号?' : '已有账号?'}
-                </span>
-              </div>
-            </div>
-            <Button
-              variant='ghost'
-              onClick={() => setIsLogin(!isLogin)}
-              className='mt-4 text-blue-500 hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 font-medium text-sm transition-colors duration-200'
-            >
-              {isLogin ? '立即注册' : '立即登录'}
-            </Button>
-          </div>
+          <div className='h-10' />
         </div>
       </div>
     </div>

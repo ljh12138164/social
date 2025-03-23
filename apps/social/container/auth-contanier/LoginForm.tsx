@@ -109,10 +109,7 @@ export function LoginForm() {
         </div>
 
         <div className='text-sm'>
-          <a
-            href='#'
-            className='font-medium text-blue-500 hover:text-blue-600 transition-colors duration-200'
-          >
+          <a href='#' className='font-medium  transition-colors duration-200'>
             忘记密码？
           </a>
         </div>
@@ -121,7 +118,7 @@ export function LoginForm() {
       <Button
         type='submit'
         disabled={isPending}
-        className='w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white text-base font-semibold rounded-full shadow-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-6'
+        className='w-full py-3 px-4 text-white text-base font-semibold rounded-full shadow-sm transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed mt-6'
       >
         {isPending ? (
           <div className='flex items-center justify-center'>

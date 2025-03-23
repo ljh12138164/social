@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { post } from '@/lib/http';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 import { UserPlus } from 'lucide-react';
 
 interface FriendSuggestionsProps {

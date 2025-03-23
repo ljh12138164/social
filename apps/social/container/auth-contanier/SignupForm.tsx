@@ -167,7 +167,7 @@ export function SignupForm({
       <Button
         type='submit'
         disabled={isPending}
-        className='w-full bg-blue-500 hover:bg-blue-600 text-white mt-2'
+        className='w-full  text-white mt-2'
       >
         {isPending ? '注册中...' : '注册'}
       </Button>

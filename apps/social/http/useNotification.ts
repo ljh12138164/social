@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { get, post } from '@/lib/http';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 
 export interface Notification {
   id: string;
