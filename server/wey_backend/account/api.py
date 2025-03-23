@@ -150,14 +150,17 @@ def editpassword(request):
 def send_friendship_request(request, pk):
     user = User.objects.get(pk=pk)
 
-    check1 = FriendshipRequest.objects.filter(created_for=request.user).filter(created_by=user)
-    check2 = FriendshipRequest.objects.filter(created_for=user).filter(created_by=request.user)
+    # 检查是否已经是好友
+    if request.user.friends.filter(id=user.id).exists():
+        return JsonResponse({'message': 'already friends'})
 
-    if not check1 or not check2:
+    # 检查是否有未处理的好友请求
+    check1 = FriendshipRequest.objects.filter(created_for=request.user, created_by=user, status=FriendshipRequest.SENT)
+    check2 = FriendshipRequest.objects.filter(created_for=user, created_by=request.user, status=FriendshipRequest.SENT)
+
+    if not check1.exists() and not check2.exists():
         friendrequest = FriendshipRequest.objects.create(created_for=user, created_by=request.user)
-
         notification = create_notification(request, 'new_friendrequest', friendrequest_id=friendrequest.id)
-
         return JsonResponse({'message': 'friendship request created'})
     else:
         return JsonResponse({'message': 'request already sent'})
@@ -167,21 +170,22 @@ def send_friendship_request(request, pk):
 def handle_request(request, pk, status):
     user = User.objects.get(pk=pk)
     friendship_request = FriendshipRequest.objects.filter(created_for=request.user).get(created_by=user)
-    friendship_request.status = status
-    friendship_request.save()
-
-    user.friends.add(request.user)
-    user.friends_count = user.friends_count + 1
-    user.save()
-
-    request_user = request.user
-    request_user.friends_count = request_user.friends_count + 1
-    request_user.save()
-
-    notification = create_notification(request, 'accepted_friendrequest', friendrequest_id=friendship_request.id)
     
-    # 当好友请求被接受时，自动创建会话
     if status == FriendshipRequest.ACCEPTED:
+        friendship_request.status = status
+        friendship_request.save()
+        
+        user.friends.add(request.user)
+        user.friends_count = user.friends_count + 1
+        user.save()
+
+        request_user = request.user
+        request_user.friends_count = request_user.friends_count + 1
+        request_user.save()
+
+        notification = create_notification(request, 'accepted_friendrequest', friendrequest_id=friendship_request.id)
+        
+        # 当好友请求被接受时，自动创建会话
         from chat.models import Conversation
         
         # 检查是否已存在会话
@@ -192,6 +196,22 @@ def handle_request(request, pk, status):
             conversation = Conversation.objects.create()
             conversation.users.add(user, request.user)
             conversation.save()
+    else:
+        # 如果拒绝请求，发送拒绝通知并删除原有通知和请求
+        from notification.models import Notification
+        
+        # 删除原有的好友请求通知
+        Notification.objects.filter(
+            created_by=user,
+            created_for=request.user,
+            type_of_notification=Notification.NEWFRIENDREQUEST
+        ).delete()
+        
+        # 发送拒绝通知
+        notification = create_notification(request, 'rejected_friendrequest', friendrequest_id=friendship_request.id)
+        
+        # 删除好友请求记录
+        friendship_request.delete()
 
     return JsonResponse({'message': 'friendship request updated'})
 

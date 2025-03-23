@@ -91,6 +91,7 @@
     "@types/react-dom": "^19",
     "babel-plugin-react-compiler": "19.0.0-beta-3229e95-20250315",
     "biome": "^0.3.3",
+    "critters": "^0.0.25",
     "https-proxy-agent": "^7.0.6",
     "tailwindcss": "^4",
     "typescript": "^5"
