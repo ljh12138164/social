@@ -89,22 +89,6 @@ export const RightSidebar = () => {
                         帖子数 {user.posts_count}
                       </div>
                     </div>
-                    <Button
-                      variant='outline'
-                      size='sm'
-                      className='shadow-sm hover:shadow transition-all hover:bg-primary hover:text-primary-foreground'
-                      onClick={() => sendFriendRequest.mutate(user.id)}
-                      disabled={sendFriendRequest.isPending}
-                    >
-                      {sendFriendRequest.isPending ? (
-                        <Loader2 className='h-4 w-4 animate-spin' />
-                      ) : (
-                        <>
-                          <UserPlus className='h-4 w-4 mr-1' />
-                          添加
-                        </>
-                      )}
-                    </Button>
                   </div>
                 ))}
                 {suggestedUsers.length > 3 && (
