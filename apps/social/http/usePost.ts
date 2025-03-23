@@ -99,13 +99,6 @@ export const useCreatePost = () => {
       // 创建成功后，刷新帖子列表
       queryClient.invalidateQueries({ queryKey: ['posts'] });
     },
-    onError: (error: any) => {
-      console.log(error?.message);
-      console.error(
-        '创建帖子失败:',
-        error.response?.data?.message || '未知错误'
-      );
-    },
   });
 };
 
@@ -205,10 +198,6 @@ export const useCreateComment = (postId: string) => {
       if (context?.previousPost) {
         queryClient.setQueryData(['post', postId], context.previousPost);
       }
-      console.error(
-        '创建评论失败:',
-        (err as any).response?.data?.message || '未知错误'
-      );
     },
     onSettled: () => {
       // 无论成功或失败，都重新获取最新数据
@@ -274,10 +263,6 @@ export const useLikeComment = (postId: string, commentId: string) => {
       if (context?.previousPost) {
         queryClient.setQueryData(['post', postId], context.previousPost);
       }
-      console.error(
-        '点赞评论失败:',
-        (err as any).response?.data?.message || '未知错误'
-      );
     },
     onSettled: () => {
       // 无论成功或失败，都重新获取最新数据
@@ -322,12 +307,6 @@ export const useDeletePost = (postId: string) => {
       queryClient.invalidateQueries({ queryKey: ['posts'] });
       queryClient.invalidateQueries({ queryKey: ['user_posts'] });
       queryClient.invalidateQueries({ queryKey: ['userProfile'] });
-    },
-    onError: (error: any) => {
-      console.error(
-        '删除帖子失败:',
-        error.response?.data?.message || '未知错误'
-      );
     },
   });
 };

@@ -73,7 +73,6 @@ const UserEditModal = ({ user, open, onOpenChange }: UserEditModalProps) => {
       toast.success('用户信息更新成功');
     } catch (error) {
       toast.error('用户信息更新失败');
-      console.error('更新用户失败:', error);
     }
   };
 

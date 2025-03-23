@@ -3,6 +3,7 @@ import { get, post } from '@/lib/http';
 import { useEffect, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { getAccessToken } from './useAuth';
+import { useChatStore } from '@/store/chat';
 
 // 消息类型定义
 export interface ChatMessage {
@@ -190,9 +191,23 @@ export const useRealTimeChat = (
 ) => {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const queryClient = useQueryClient();
+  const { addUnreadMessage, setActiveConversationId } = useChatStore();
 
   useEffect(() => {
-    if (!socket || !userId || !targetId) return;
+    if (conversationId) {
+      setActiveConversationId(conversationId);
+    }
+
+    return () => {
+      if (conversationId) {
+        setActiveConversationId(null);
+      }
+    };
+  }, [conversationId, setActiveConversationId]);
+
+  useEffect(() => {
+    if (!socket || !userId) return;
+
     // 监听新消息
     socket.on(`chat:${conversationId}`, (newMessage: ChatMessage) => {
       setMessages((prev) => [...prev, newMessage]);
@@ -200,17 +215,31 @@ export const useRealTimeChat = (
         'chatHistory',
         conversationId,
       ]);
-      console.log(oldMessages, newMessage);
       queryClient.setQueryData(
         ['chatHistory', conversationId],
         [...(oldMessages || []), newMessage]
       );
     });
 
+    // 监听所有消息通知
+    socket.on(
+      'messageNotification',
+      (data: { conversationId: string; message: string; sendId: string }) => {
+        // 如果不是自己发的消息才添加通知
+        if (data.sendId !== userId) {
+          addUnreadMessage(data.conversationId, data.message, data.sendId);
+
+          // 更新会话列表中的最新消息
+          queryClient.invalidateQueries({ queryKey: ['conversations'] });
+        }
+      }
+    );
+
     return () => {
       socket.off(`chat:${conversationId}`);
+      socket.off('messageNotification');
     };
-  }, [socket, userId, targetId, queryClient]);
+  }, [socket, userId, targetId, conversationId, queryClient, addUnreadMessage]);
 
   // 发送消息
   const sendMessage = (content: string, conversationId?: string) => {

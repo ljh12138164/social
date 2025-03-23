@@ -46,7 +46,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         const response = await axios.get('/api/account/me/');
         setUser(response.data);
       } catch (error) {
-        console.error('检查身份验证时出错:', error);
         setUser(null);
       } finally {
         setIsLoading(false);
@@ -80,7 +79,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       return response.data;
     } catch (error) {
-      console.error('登录失败:', error);
       throw error;
     }
   };
@@ -97,7 +95,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       return response.data;
     } catch (error) {
-      console.error('注册失败:', error);
       throw error;
     }
   };
@@ -125,7 +122,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setUser(response.data);
       return response.data;
     } catch (error) {
-      console.error('刷新用户信息失败:', error);
       throw error;
     }
   };

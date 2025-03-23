@@ -48,8 +48,7 @@ const formatDateSafe = (dateString: string | null | undefined): string => {
       return '无效日期';
     }
     return dayjs(date).locale('zh-cn').format('YYYY-MM-DD HH:mm:ss');
-  } catch (error) {
-    console.error('日期格式化错误:', error);
+  } catch {
     return '日期错误';
   }
 };
@@ -108,9 +107,7 @@ const UserManagement = () => {
       setSelectedUser(null);
       // 删除成功后刷新用户列表
       refetch();
-    } catch (error) {
-      console.error('删除用户失败:', error);
-    }
+    } catch {}
   };
   return (
     <div>

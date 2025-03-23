@@ -3,6 +3,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { formatDistanceToNow } from 'date-fns';
 import { zhCN } from 'date-fns/locale';
+import { useChatStore } from '@/store/chat';
 
 interface ConversationItemProps {
   conversation: Conversation;
@@ -15,6 +16,11 @@ export const ConversationItem = ({
   isActive,
   onClick,
 }: ConversationItemProps) => {
+  const { notifications } = useChatStore();
+
+  // 获取最新的消息通知
+  const notification = notifications[conversation.id];
+
   // 格式化最后消息时间
   const formattedTime = conversation.lastMessageTime
     ? formatDistanceToNow(new Date(conversation.lastMessageTime), {
@@ -29,6 +35,9 @@ export const ConversationItem = ({
       ? conversation.avatar
       : `${process.env.NEXT_PUBLIC_API_URL}${conversation.avatar}`
     : '';
+
+  // 获取要显示的最后消息内容
+  const lastMessage = notification?.message || conversation.lastMessage || '';
 
   return (
     <div
@@ -60,8 +69,15 @@ export const ConversationItem = ({
         </div>
 
         <div className='flex items-center'>
-          <p className='text-sm text-gray-500 truncate mr-2 max-w-[180px]'>
-            {conversation.lastMessage}
+          <p
+            className={cn(
+              'text-sm truncate mr-2 max-w-[180px]',
+              conversation.unreadCount
+                ? 'text-gray-800 font-medium'
+                : 'text-gray-500'
+            )}
+          >
+            {lastMessage}
           </p>
           {conversation.unreadCount ? (
             <span className='bg-red-500 text-white text-xs rounded-full min-w-5 h-5 flex items-center justify-center px-1.5'>

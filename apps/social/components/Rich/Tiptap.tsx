@@ -16,9 +16,7 @@ export const HashtagHighlight = Extension.create({
 
   addOptions() {
     return {
-      onHashtagClick: (hashtag: string) => {
-        console.log('点击了标签:', hashtag);
-      },
+      onHashtagClick: (hashtag: string) => {},
     };
   },
 

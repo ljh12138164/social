@@ -153,7 +153,7 @@ export const UserProfileContainer = () => {
       <div
         className='h-48 relative'
         style={{
-          backgroundImage: `url('blackground.jpg')`,
+          backgroundImage: `url('blackground.webp')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}

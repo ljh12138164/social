@@ -16,14 +16,16 @@ export const HomeContainer = ({ children }: HomeContainerProps) => {
   const isAuth = pathname.startsWith('/auth') || pathname.startsWith('/admin');
   if (isAuth) return children;
   return (
-    <div className='flex flex-col min-h-screen bg-background px-30'>
+    <>
       {!isAuth && <TopNavbar />}
-      <div className='flex flex-1 pt-14 gap-2'>
-        <ScrollArea className='flex-1 h-[calc(100vh-3.5rem)] px-2'>
-          {children}
-        </ScrollArea>
-        <RightSidebar />
+      <div className='flex flex-col min-h-screen bg-background px-30'>
+        <div className='flex flex-1 pt-14 gap-2'>
+          <ScrollArea className='flex-1 h-[calc(100vh-3.5rem)] px-2'>
+            {children}
+          </ScrollArea>
+          <RightSidebar />
+        </div>
       </div>
-    </div>
+    </>
   );
 };

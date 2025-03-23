@@ -3,6 +3,7 @@ import { useConversations, useSocketConnection } from '@/http/useChat';
 import { useState, useEffect } from 'react';
 import { ConversationList } from './ConversationList';
 import { ChatBox } from './ChatBox';
+import { useChatStore } from '@/store/chat';
 
 export interface ActiveConversation {
   id: string;
@@ -24,6 +25,9 @@ export const ChatContainer = ({
   // 连接 Socket
   const { socket, isConnected } = useSocketConnection(userId);
 
+  // 获取chatStore中的方法
+  const { addUnreadMessage } = useChatStore();
+
   // 获取会话列表
   const {
     data: conversations,
@@ -41,6 +45,29 @@ export const ChatContainer = ({
       setActiveConversation(initialActiveConversation);
     }
   }, [initialActiveConversation]);
+
+  // 全局监听消息通知
+  useEffect(() => {
+    if (!socket || !userId) return;
+
+    // 监听所有会话的消息通知
+    socket.on(
+      'messageNotification',
+      (data: { conversationId: string; message: string; sendId: string }) => {
+        // 如果不是自己发送的消息，且不是当前活跃会话的消息，才添加通知
+        if (
+          data.sendId !== userId &&
+          (!activeConversation || activeConversation.id !== data.conversationId)
+        ) {
+          addUnreadMessage(data.conversationId, data.message, data.sendId);
+        }
+      }
+    );
+
+    return () => {
+      socket.off('messageNotification');
+    };
+  }, [socket, userId, activeConversation, addUnreadMessage]);
 
   if (conversationsError) {
     return (

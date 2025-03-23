@@ -48,7 +48,7 @@ export const ProfileContainer = () => {
         <div
           className='absolute top-0 left-0 w-full h-full'
           style={{
-            backgroundImage: `url('/blackground.jpg')`,
+            backgroundImage: `url('/blackground.webp')`,
             backgroundSize: 'cover',
             backgroundPosition: 'bottom',
           }}

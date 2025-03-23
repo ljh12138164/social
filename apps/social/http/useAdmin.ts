@@ -145,12 +145,6 @@ export const useAdminCreateUser = () => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', 'stats'] });
     },
-    onError: (error: any) => {
-      console.error(
-        '创建用户失败:',
-        error.response?.data?.message || '未知错误'
-      );
-    },
   });
 };
 
@@ -176,12 +170,6 @@ export const useAdminUpdateUser = (userId: string) => {
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', 'stats'] });
     },
-    onError: (error: any) => {
-      console.error(
-        '更新用户失败:',
-        error.response?.data?.message || '未知错误'
-      );
-    },
   });
 };
 
@@ -204,12 +192,6 @@ export const useAdminDeleteUser = (userId: string) => {
       // 删除成功后，刷新用户列表和统计数据
       queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
       queryClient.invalidateQueries({ queryKey: ['admin', 'users', 'stats'] });
-    },
-    onError: (error: any) => {
-      console.error(
-        '删除用户失败:',
-        error.response?.data?.message || '未知错误'
-      );
     },
   });
 };

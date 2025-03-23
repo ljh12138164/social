@@ -5,6 +5,9 @@ import { useRouter } from 'next/navigation';
 import { FriendRequestsDialog } from '../friends-container';
 import { ActiveConversation } from './ChatContainer';
 import { ConversationItem } from './ConversationItem';
+import { useChatStore } from '@/store/chat';
+import { useEffect } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 interface ConversationListProps {
   conversations: Conversation[];
   isLoading: boolean;
@@ -19,7 +22,19 @@ export const ConversationList = ({
   onSelect,
 }: ConversationListProps) => {
   const router = useRouter();
+  const queryClient = useQueryClient();
   const { data: friendsData, isLoading: isLoadingFriends } = useFriends();
+  const { unreadMessages, clearUnreadMessages, setActiveConversationId } =
+    useChatStore();
+
+  // 当活跃的会话ID改变时，清除该会话的未读消息
+  useEffect(() => {
+    if (activeId) {
+      clearUnreadMessages(activeId);
+      setActiveConversationId(activeId);
+    }
+  }, [activeId, clearUnreadMessages, setActiveConversationId]);
+
   if (isLoading) {
     return (
       <div className='space-y-2 p-3'>
@@ -37,6 +52,13 @@ export const ConversationList = ({
       </div>
     );
   }
+
+  // 合并会话数据和未读消息计数
+  const conversationsWithUnread = conversations.map((conversation) => ({
+    ...conversation,
+    unreadCount: unreadMessages[conversation.id] || 0,
+  }));
+
   return (
     <div className='flex flex-col h-full'>
       {/* 头部 */}
@@ -50,7 +72,7 @@ export const ConversationList = ({
       </div>
 
       {/* 会话列表 */}
-      {conversations.length === 0 ? (
+      {conversationsWithUnread.length === 0 ? (
         <div className='h-full flex flex-col items-center justify-center p-4 text-gray-400'>
           <svg
             xmlns='http://www.w3.org/2000/svg'
@@ -72,12 +94,17 @@ export const ConversationList = ({
         </div>
       ) : (
         <div className='overflow-auto flex-1 py-1'>
-          {conversations.map((conversation) => (
+          {conversationsWithUnread.map((conversation) => (
             <ConversationItem
               key={conversation.id}
               conversation={conversation}
               isActive={activeId === conversation.id}
               onClick={() => {
+                // 选择会话时清除未读消息
+                clearUnreadMessages(conversation.id);
+                queryClient.invalidateQueries({
+                  queryKey: ['chatHistory', conversation.id],
+                });
                 onSelect({
                   id: conversation.id,
                   userId: conversation.userId || '',

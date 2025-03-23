@@ -48,7 +48,6 @@ export const RightSidebar = () => {
       toast.error('发送好友请求失败: ' + (error.message || '未知错误'));
     },
   });
-  console.log(currentQuery);
   if (isShown) return null;
 
   return (

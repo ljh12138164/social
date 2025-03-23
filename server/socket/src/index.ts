@@ -61,7 +61,6 @@ io.on('connection', (socket) => {
   socket.on('sendMessage', (data: ChatMessage) => {
     // 创建会话ID
     const { conversationId } = data;
-    console.log(conversationId);
     // 添加时间戳和会话ID
     const messageWithTimestamp = {
       ...data,
@@ -71,6 +70,14 @@ io.on('connection', (socket) => {
 
     // 发送到特定会话频道
     io.emit(`chat:${conversationId}`, messageWithTimestamp);
+
+    // 发送消息通知给所有连接的客户端
+    // 这样当用户不在当前会话页面或会话不活跃时也能收到通知
+    io.emit('messageNotification', {
+      conversationId: conversationId,
+      message: data.message,
+      sendId: data.sendId,
+    });
   });
 
   // 错误处理

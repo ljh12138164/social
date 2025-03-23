@@ -166,7 +166,6 @@ const HomePage = () => {
           toast.success('发布成功！');
         },
         onError: (error) => {
-          console.error(error);
           toast.error('发布失败，请稍后重试');
         },
       }
@@ -226,7 +225,6 @@ const HomePage = () => {
             toast.success(`图片 ${file.name} 压缩成功`);
           } catch (error) {
             toast.error(`图片 ${file.name} 太大，无法处理`);
-            console.error('压缩失败:', error);
           }
         } else {
           // 小于限制大小的图片直接添加
@@ -239,7 +237,6 @@ const HomePage = () => {
       setPostImages((prev) => [...prev, ...newImages]);
       setImagePreviewUrls((prev) => [...prev, ...newPreviewUrls]);
     } catch (error) {
-      console.error('处理图片时出错:', error);
       toast.error('处理图片时出错，请重试');
     } finally {
       setIsProcessing(false);

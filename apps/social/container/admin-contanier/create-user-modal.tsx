@@ -51,7 +51,6 @@ const CreateUserModal = ({ open, onOpenChange }: CreateUserModalProps) => {
       toast.success('用户创建成功');
     } catch (error) {
       toast.error('用户创建失败');
-      console.error('创建用户失败:', error);
     }
   };
 
