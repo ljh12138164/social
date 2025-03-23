@@ -27,11 +27,11 @@ def create_notification(request, type_of_notification, post_id=None, friendreque
         body = f'{request.user.name} 向你发送了好友请求！'
     elif type_of_notification == 'accepted_friendrequest':
         friendrequest = FriendshipRequest.objects.get(pk=friendrequest_id)
-        created_for = friendrequest.created_for
+        created_for = friendrequest.created_by
         body = f'{request.user.name} 接受了你的好友请求！'
     elif type_of_notification == 'rejected_friendrequest':
         friendrequest = FriendshipRequest.objects.get(pk=friendrequest_id)
-        created_for = friendrequest.created_for
+        created_for = friendrequest.created_by
         body = f'{request.user.name} 拒绝了你的好友请求！'
 
     notification = Notification.objects.create(
