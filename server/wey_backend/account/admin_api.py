@@ -1,12 +1,16 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.hashers import make_password
+from django.db.models import Count
+from django.db.models.functions import TruncDate
+from datetime import datetime, timedelta
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, BasePermission
 
 from .models import User, FriendshipRequest, MibtTestResult
 from .serializers import UserSerializer
+from post.models import Post
 
 
 class IsAdminPermission(BasePermission):
@@ -137,6 +141,12 @@ def admin_update_user(request, user_id):
         user.bio = data['bio']
         
     if 'is_active' in data:
+        # 不允许禁用管理员账号
+        if user.is_admin and not data['is_active']:
+            return JsonResponse({
+                'success': False,
+                'message': '不能禁用管理员账号'
+            }, status=400)
         user.is_active = data['is_active']
         
     if 'is_staff' in data:
@@ -188,17 +198,24 @@ def admin_user_statistics(request):
     superusers = User.objects.filter(is_superuser=True).count()
     admin_users = User.objects.filter(is_admin=True).count()
     
-    # 获取最近注册的用户
-    recent_users = User.objects.order_by('-date_joined')[:5]
-    recent_users_serializer = UserSerializer(recent_users, many=True)
+    # 获取帖子总数
+    total_posts = Post.objects.count()
     
-    # 获取各MBTI类型的用户数量统计
-    mbti_stats = {}
-    for result in MibtTestResult.objects.all():
-        if result.personality_type in mbti_stats:
-            mbti_stats[result.personality_type] += 1
-        else:
-            mbti_stats[result.personality_type] = 1
+    # 获取近七日每日新增用户数量
+    seven_days_ago = datetime.now() - timedelta(days=7)
+    daily_new_users = User.objects.filter(
+        date_joined__gte=seven_days_ago
+    ).annotate(
+        date=TruncDate('date_joined')
+    ).values('date').annotate(
+        count=Count('id')
+    ).order_by('date')
+    
+    # 获取最近七日注册的用户
+    recent_users = User.objects.filter(
+        date_joined__gte=seven_days_ago
+    ).order_by('-date_joined')
+    recent_users_serializer = UserSerializer(recent_users, many=True)
     
     return JsonResponse({
         'total_users': total_users,
@@ -207,8 +224,15 @@ def admin_user_statistics(request):
         'staff_users': staff_users,
         'superusers': superusers,
         'admin_users': admin_users,
+        'total_posts': total_posts,
         'recent_users': recent_users_serializer.data,
-        'mbti_statistics': mbti_stats
+        'daily_new_users': [
+            {
+                'date': item['date'].strftime('%Y-%m-%d'),
+                'count': item['count']
+            }
+            for item in daily_new_users
+        ]
     })
 
 

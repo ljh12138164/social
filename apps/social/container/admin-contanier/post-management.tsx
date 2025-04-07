@@ -332,7 +332,7 @@ const PostManagement = () => {
             </SelectContent>
           </Select>
 
-          <DropdownMenu>
+          {/* <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
                 variant='outline'
@@ -402,8 +402,8 @@ const PostManagement = () => {
                 </Select>
               </div>
 
-              <DropdownMenuSeparator />
-              <div className='p-2'>
+              <DropdownMenuSeparator /> */}
+              {/* <div className='p-2'>
                 <Button
                   variant='outline'
                   size='sm'
@@ -414,16 +414,16 @@ const PostManagement = () => {
                 </Button>
               </div>
             </DropdownMenuContent>
-          </DropdownMenu>
+          </DropdownMenu> */}
 
-          <Button
+          {/* <Button
             variant='outline'
             onClick={() => refetch()}
             className='h-10 rounded-xl border-gray-200 hover:bg-gray-50 hover:text-purple hover:border-purple transition-colors flex items-center gap-2'
           >
             <RefreshCw className='h-4 w-4' />
             刷新
-          </Button>
+          </Button> */}
         </div>
       </div>
 

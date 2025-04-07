@@ -311,7 +311,7 @@ export const ChatBox = ({
               </motion.div>
               <TooltipContent
                 side='right'
-                sideOffset={-10}
+                sideOffset={-28}
                 align='center'
                 className='z-50'
               >
@@ -328,7 +328,7 @@ export const ChatBox = ({
                   transition={{ duration: 0.3 }}
                   className='absolute bottom-10 left-16 z-30 overflow-hidden'
                 >
-                  <Card className='p-4 shadow-lg border-green-200 w-full'>
+                  <Card className='p-4 shadow-lg border-green-200 w-[600px]'>
                     <CardContent className='p-2'>
                       {isAiChatLoading ? (
                         <div className='flex justify-center py-10 w-f'>
@@ -343,21 +343,24 @@ export const ChatBox = ({
                         <>
                           {streamResponse ? (
                             <>
-                              <p className='font-bold text-xl'>
+                              <p className='font-bold text-xl mb-3'>
                                 情感分析及建议:
                               </p>
-                              <ScrollArea className='grid grid-cols-[1fr_70px] gap-2 h-[150px]'>
-                                <Markdown>{streamResponse}</Markdown>
-                                <Button
-                                  className='self-end'
-                                  variant='outline'
-                                  onClick={() => {
-                                    setShowDogCard(false);
-                                    setStreamResponse('');
-                                  }}
-                                >
-                                  我知道了
-                                </Button>
+                              <ScrollArea className='h-[150px] pr-4'>
+                                <div className='space-y-2'>
+                                  <Markdown>{streamResponse}</Markdown>
+                                  <div className='flex justify-end mt-4'>
+                                    <Button
+                                      variant='outline'
+                                      onClick={() => {
+                                        setShowDogCard(false);
+                                        setStreamResponse('');
+                                      }}
+                                    >
+                                      我知道了
+                                    </Button>
+                                  </div>
+                                </div>
                               </ScrollArea>
                             </>
                           ) : (
@@ -373,13 +376,13 @@ export const ChatBox = ({
                                 <div>
                                   <h3 className='font-medium'>线条小狗</h3>
                                   <p className='text-sm text-gray-500'>
-                                    你好呀！我是AI聊天小助手
+                                    AI助手
                                   </p>
                                 </div>
                               </div>
                               <div className='mt-3 text-sm'>
                                 <p>
-                                  陌陌，我是AI聊天小助手，你知道大担担不知道怎么继续聊下去吗？让我来帮帮你吧。
+                                  哈喽，我是线条小狗，不知道怎么继续聊下去吗？让我来帮帮你吧。
                                 </p>
                                 <p className='text-xs text-gray-400 mt-1'>
                                   (注意:

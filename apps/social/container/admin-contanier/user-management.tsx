@@ -120,6 +120,7 @@ const UserManagement = () => {
               <TableHead className='py-4'>用户信息</TableHead>
               <TableHead className='py-4'>注册时间</TableHead>
               <TableHead className='py-4'>角色</TableHead>
+              <TableHead className='py-4'>状态</TableHead>
               <TableHead className='text-right py-4'>操作</TableHead>
             </TableRow>
           </TableHeader>
@@ -162,6 +163,17 @@ const UserManagement = () => {
                     ) : (
                       <Badge className='bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors'>
                         普通用户
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {user.is_active ? (
+                      <Badge className='bg-green-100 text-green-600 hover:bg-green-200 transition-colors'>
+                        已启用
+                      </Badge>
+                    ) : (
+                      <Badge className='bg-red-100 text-red-600 hover:bg-red-200 transition-colors'>
+                        已禁用
                       </Badge>
                     )}
                   </TableCell>

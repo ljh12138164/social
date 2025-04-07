@@ -13,6 +13,12 @@ interface Question {
 interface MBTIData {
   question: Question[];
 }
+
+interface MBTIStatistics {
+  type: string;
+  count: number;
+}
+
 /**
  * ### 获取MBTI测试题
  * @returns MBTI测试题
@@ -36,6 +42,20 @@ export const useSaveMBTI = () => {
     mutationFn: async (data: MBTIResult) => {
       const response = await post('/mibt/save/', data);
       return response.json();
+    },
+  });
+};
+
+/**
+ * ### 获取MBTI统计数据
+ * @returns MBTI类型分布统计
+ */
+export const useMBTIStatistics = () => {
+  return useQuery<MBTIStatistics[]>({
+    queryKey: ['mbti-statistics'],
+    queryFn: async () => {
+      const response = await get('/mibt/statistics/');
+      return response;
     },
   });
 };

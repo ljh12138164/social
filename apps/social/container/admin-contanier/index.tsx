@@ -49,7 +49,7 @@ const AdminContainer = ({ children }: { children?: React.ReactNode }) => {
           <SidebarHeader className='px-6 py-6 border-b border-gray-100'>
             <h1 className='text-xl font-bold text-purple flex items-center gap-2'>
               <Shield className='h-5 w-5' />
-              管理员控制台
+              运营后台
             </h1>
           </SidebarHeader>
           <SidebarContent className='py-6'>

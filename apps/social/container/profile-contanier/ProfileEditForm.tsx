@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Profile, useUpdateProfile } from '@/http/useProfile';
 import { AVATAR_URL } from '@/lib';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Camera, FileText, Loader2, User2 } from 'lucide-react';
+import { Camera, FileText, Key, Loader2, User2 } from 'lucide-react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
@@ -16,11 +16,18 @@ import { toast } from 'react-hot-toast';
 import * as z from 'zod';
 import { Label } from '../../components/ui/label';
 import Link from 'next/link';
+import axios from 'axios';
 
 const profileSchema = z.object({
   name: z.string().min(2, '名字至少需要2个字符'),
   bio: z.string().max(500, '简介不能超过500个字符').optional(),
   avatar: z.string().optional(),
+  oldPassword: z.string().min(1, '请输入旧密码'),
+  newPassword: z.string().min(6, '新密码至少需要6个字符'),
+  confirmPassword: z.string().min(6, '确认密码至少需要6个字符'),
+}).refine((data) => data.newPassword === data.confirmPassword, {
+  message: "新密码和确认密码不匹配",
+  path: ["confirmPassword"],
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -31,6 +38,7 @@ interface ProfileEditFormProps {
 
 export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
   const router = useRouter();
   const updateProfile = useUpdateProfile();
   const ref = useRef<HTMLInputElement>(null);
@@ -41,6 +49,9 @@ export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
       name: defaultValues?.name || '',
       bio: defaultValues?.bio || '',
       avatar: defaultValues?.avatar || '',
+      oldPassword: '',
+      newPassword: '',
+      confirmPassword: '',
     },
   });
 
@@ -53,6 +64,22 @@ export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
 
   const onSubmit = async (data: ProfileFormValues) => {
     try {
+      // 如果有修改密码的数据，先处理密码修改
+      if (data.oldPassword && data.newPassword) {
+        try {
+          await axios.post('/api/account/editpassword', {
+            old_password: data.oldPassword,
+            new_password1: data.newPassword,
+            new_password2: data.confirmPassword,
+          });
+          toast.success('密码修改成功');
+        } catch (error) {
+          toast.error('密码修改失败，请检查旧密码是否正确');
+          return;
+        }
+      }
+
+      // 处理个人资料更新
       updateProfile.mutate(
         {
           ...data,
@@ -166,6 +193,63 @@ export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
                   {form.formState.errors.bio.message}
                 </p>
               )}
+            </div>
+
+            <div className='border-t border-gray-200 dark:border-gray-800 pt-6 mt-6'>
+              <Label
+                htmlFor='password'
+                className='bg-background px-4 text-xs text-muted-foreground flex items-center gap-1 border-r border-gray-200 dark:border-gray-800'
+              >
+                <Key className='w-3 h-3' />
+                <p className='whitespace-nowrap'>修改密码</p>
+              </Label>
+              
+              <div className='space-y-4 mt-4'>
+                <div className='flex items-center gap-2 border border-gray-200 dark:border-gray-800 rounded-2xl px-2 focus-within:border-blue-500 transition-all hover:border-blue-500/50'>
+                  <Input
+                    type='password'
+                    {...form.register('oldPassword')}
+                    placeholder='请输入旧密码'
+                    className='border-0 p-2 text-lg focus-visible:ring-0 placeholder:text-muted-foreground/50'
+                  />
+                </div>
+                {form.formState.errors.oldPassword && (
+                  <p className='text-sm text-red-500 mt-1 flex items-center gap-1'>
+                    <span className='inline-block w-1 h-1 rounded-full bg-red-500' />
+                    {form.formState.errors.oldPassword.message}
+                  </p>
+                )}
+
+                <div className='flex items-center gap-2 border border-gray-200 dark:border-gray-800 rounded-2xl px-2 focus-within:border-blue-500 transition-all hover:border-blue-500/50'>
+                  <Input
+                    type='password'
+                    {...form.register('newPassword')}
+                    placeholder='请输入新密码'
+                    className='border-0 p-2 text-lg focus-visible:ring-0 placeholder:text-muted-foreground/50'
+                  />
+                </div>
+                {form.formState.errors.newPassword && (
+                  <p className='text-sm text-red-500 mt-1 flex items-center gap-1'>
+                    <span className='inline-block w-1 h-1 rounded-full bg-red-500' />
+                    {form.formState.errors.newPassword.message}
+                  </p>
+                )}
+
+                <div className='flex items-center gap-2 border border-gray-200 dark:border-gray-800 rounded-2xl px-2 focus-within:border-blue-500 transition-all hover:border-blue-500/50'>
+                  <Input
+                    type='password'
+                    {...form.register('confirmPassword')}
+                    placeholder='请确认新密码'
+                    className='border-0 p-2 text-lg focus-visible:ring-0 placeholder:text-muted-foreground/50'
+                  />
+                </div>
+                {form.formState.errors.confirmPassword && (
+                  <p className='text-sm text-red-500 mt-1 flex items-center gap-1'>
+                    <span className='inline-block w-1 h-1 rounded-full bg-red-500' />
+                    {form.formState.errors.confirmPassword.message}
+                  </p>
+                )}
+              </div>
             </div>
           </div>
 
