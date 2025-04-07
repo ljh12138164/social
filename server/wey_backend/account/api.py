@@ -3,6 +3,7 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.core.mail import send_mail
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
+from django.db.models import Count
 
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -267,3 +268,24 @@ def get_mibt_result(request, user_id=None):
         return JsonResponse(serializer.data)
     except MibtTestResult.DoesNotExist:
         return JsonResponse({'error': '该用户尚未完成MIBT测试'}, status=404)
+
+@api_view(['GET'])
+def get_mbti_statistics(request):
+    """
+    获取所有用户的MBTI类型分布统计
+    """
+    # 使用annotate和values来统计每种类型的数量
+    statistics = MibtTestResult.objects.values('personality_type').annotate(
+        count=Count('id')
+    ).order_by('personality_type')
+    
+    # 转换数据格式为前端需要的格式
+    result = [
+        {
+            'type': stat['personality_type'],
+            'count': stat['count']
+        }
+        for stat in statistics
+    ]
+    
+    return JsonResponse(result, safe=False)

@@ -4,6 +4,17 @@ const nextConfig: NextConfig = {
   /* config options here */
   compress: true,
 
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.optimization.splitChunks = {
+        minSize: 20000,
+        maxSize: 240000,
+        chunks: 'all',
+      };
+    }
+    return config;
+  },
+
   // 图片优化配置
   images: {
     remotePatterns: [

@@ -12,6 +12,7 @@ import { debounce } from 'lodash-es';
 import { Loader2, Search, User as UserIcon } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+
 // 用户卡片组件
 const UserCard = ({ user }: { user: any }) => {
   return (
@@ -40,24 +41,24 @@ const UserCard = ({ user }: { user: any }) => {
 const PostCard = ({ post }: { post: Post }) => {
   return (
     <Link href={`/post/${post.id}`} className='block'>
-      <Card className='p-4 hover:bg-muted/50 transition-colors rounded-lg min-h-[90px]'>
-        <div className='flex gap-3'>
+      <Card className='p-6 hover:bg-muted/50 transition-colors rounded-lg'>
+        <div className='flex gap-4'>
           <UserAvatar
             src={post.created_by.get_avatar}
             alt={post.created_by.name}
-            size='sm'
+            size='md'
           />
           <div className='flex-1'>
             <div className='flex items-center gap-2'>
-              <span className='font-bold whitespace-nowrap text-ellipsis overflow-hidden'>
+              <span className='font-bold text-lg'>
                 {post.created_by.name}
               </span>
               <span className='text-muted-foreground'>·</span>
-              <span className='text-muted-foreground whitespace-nowrap text-ellipsis overflow-hidden'>
+              <span className='text-muted-foreground'>
                 {format(new Date(post.created_at), 'PP', { locale: zhCN })}
               </span>
             </div>
-            <div className='mt-2 line-clamp-3'>
+            <div className='mt-3 text-lg'>
               <Render data={post.body} />
             </div>
           </div>
@@ -158,7 +159,7 @@ export const SearchContainer = () => {
                     </svg>
                     <h2 className='font-bold text-lg'>帖子</h2>
                   </div>
-                  <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                  <div className='flex flex-col gap-4'>
                     {results.posts.map((post) => (
                       <div
                         key={post.id}

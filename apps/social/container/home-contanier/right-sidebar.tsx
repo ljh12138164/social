@@ -51,8 +51,8 @@ export const RightSidebar = () => {
   if (isShown) return null;
 
   return (
-    <div className=' w-[300px] pr-[10%] hidden bg-gray-100 lg:block  backdrop-blur'>
-      <div className='sticky top-4 space-y-4 mt-5'>
+    <div className=' w-[500px] pr-[10%] hidden bg-gray-100 lg:block  backdrop-blur'>
+      <div className='sticky top-4 space-y-4 mt-5 h-[calc(100vh-10rem)] overflow-y-auto'>
         {/* 推荐用户 */}
         <Card className='rounded-xl  p-4 shadow-sm hover:shadow-md transition-all'>
           <CardContent className='p-0'>
@@ -146,7 +146,7 @@ export const RightSidebar = () => {
                           {trend.hashtag}
                         </div>
                         <div className='text-sm text-muted-foreground'>
-                          {trend.occurences} 篇帖子
+                          热度 {trend.occurences}
                         </div>
                       </div>
                     </div>

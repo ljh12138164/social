@@ -57,13 +57,37 @@ const NotificationItem = ({ notification }: { notification: Notification }) => {
     switch (notification.type_of_notification) {
       case 'new_friendrequest':
       case 'accepted_friendrequest':
-      case 'rejected_friendrequest':
         return '/friends';
+      case 'rejected_friendrequest':
+        return '#';  // 拒绝通知不跳转
       default:
         return '#';
     }
   };
 
+  // 如果是拒绝通知，使用div而不是Link
+  if (notification.type_of_notification === 'rejected_friendrequest') {
+    return (
+      <div onClick={handleClick}>
+        <div className='p-4 hover:bg-muted/50 transition-colors border-b border-border/30'>
+          <div className='flex items-start gap-3'>
+            <div className='mt-1'>
+              <NotificationIcon type={notification.type_of_notification} />
+            </div>
+            <div className='flex-1'>
+              <p className='text-sm text-foreground'>{notification.body}</p>
+              <p className='text-xs text-muted-foreground mt-1'>
+                {NOTIFICATION_TYPES[notification.type_of_notification]} ·{' '}
+                {/* {format(new Date(), 'PPp', { locale: zhCN })} */}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // 其他通知使用Link包装器
   return (
     <Link href={getLink()} onClick={handleClick}>
       <div className='p-4 hover:bg-muted/50 transition-colors border-b border-border/30'>

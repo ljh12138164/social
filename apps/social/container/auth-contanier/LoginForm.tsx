@@ -108,11 +108,11 @@ export function LoginForm() {
           </label>
         </div>
 
-        <div className='text-sm'>
+        {/* <div className='text-sm'>
           <a href='#' className='font-medium  transition-colors duration-200'>
             忘记密码？
           </a>
-        </div>
+        </div> */}
       </div>
 
       <Button

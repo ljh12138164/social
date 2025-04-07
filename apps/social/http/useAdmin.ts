@@ -33,8 +33,13 @@ export interface UserStatistics {
   inactive_users: number;
   staff_users: number;
   superusers: number;
+  admin_users: number;
+  total_posts: number;
   recent_users: User[];
-  mbti_statistics: Record<string, number>;
+  daily_new_users: Array<{
+    date: string;
+    count: number;
+  }>;
 }
 
 interface CreateUserData {

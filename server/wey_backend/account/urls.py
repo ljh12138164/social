@@ -20,6 +20,7 @@ urlpatterns = [
     path('mibt/save/', api.save_mibt_result, name='save_mibt_result'),
     path('mibt/result/', api.get_mibt_result, name='get_mibt_result'),
     path('mibt/result/<uuid:user_id>/', api.get_mibt_result, name='get_user_mibt_result'),
+    path('mibt/statistics/', api.get_mbti_statistics, name='get_mbti_statistics'),
     
     # 管理员API
     path('admin/users/', admin_api.admin_users_list, name='admin_users_list'),

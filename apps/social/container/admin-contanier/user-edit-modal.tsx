@@ -20,6 +20,8 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'react-hot-toast';
 import * as z from 'zod';
 import { useEffect } from 'react';
+import { AlertCircle } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 
 const formSchema = z.object({
   name: z.string().min(2, '名称至少需要2个字符'),
@@ -27,6 +29,7 @@ const formSchema = z.object({
   bio: z.string().optional(),
   password: z.string().optional(),
   is_admin: z.boolean().default(false),
+  is_active: z.boolean().default(true),
 });
 
 type UserFormValues = z.infer<typeof formSchema>;
@@ -47,6 +50,7 @@ const UserEditModal = ({ user, open, onOpenChange }: UserEditModalProps) => {
       email: user.email,
       bio: user.bio || '',
       is_admin: user.is_admin,
+      is_active: user.is_active,
     },
   });
 
@@ -57,6 +61,7 @@ const UserEditModal = ({ user, open, onOpenChange }: UserEditModalProps) => {
       email: user.email,
       bio: user.bio || '',
       is_admin: user.is_admin,
+      is_active: user.is_active,
     });
   }, [user, form]);
 
@@ -75,6 +80,8 @@ const UserEditModal = ({ user, open, onOpenChange }: UserEditModalProps) => {
       toast.error('用户信息更新失败');
     }
   };
+
+  const isCurrentUserAdmin = user.is_admin;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -98,14 +105,35 @@ const UserEditModal = ({ user, open, onOpenChange }: UserEditModalProps) => {
           <Label>个人简介</Label>
           <Textarea placeholder='请输入个人简介' {...form.register('bio')} />
 
-          <div className='flex items-center gap-2'>
-            <Checkbox
-              defaultChecked={user.is_admin}
-              onCheckedChange={(checked) =>
-                form.setValue('is_admin', checked === true)
-              }
-            />
-            <Label>管理员权限</Label>
+          <div className='space-y-3'>
+            <div className='flex items-start space-x-3'>
+              <Checkbox
+                defaultChecked={user.is_admin}
+                onCheckedChange={(checked) =>
+                  form.setValue('is_admin', checked === true)
+                }
+              />
+              <div className='space-y-1'>
+                <Label>管理员权限</Label>
+              </div>
+            </div>
+
+            <div className='flex items-start space-x-3'>
+              <Checkbox
+                defaultChecked={user.is_active}
+                onCheckedChange={(checked) =>
+                  form.setValue('is_active', checked === true)
+                }
+                disabled={user.is_admin}
+              />
+              <div className='space-y-1'>
+                <Label>账号状态</Label>
+                <p className='text-xs text-gray-500'>
+                  (启用或禁用此账号的登录权限)
+                  {user.is_admin && <span className='text-red-500 ml-1'>（管理员账号不能被禁用）</span>}
+                </p>
+              </div>
+            </div>
           </div>
 
           <DialogFooter>
