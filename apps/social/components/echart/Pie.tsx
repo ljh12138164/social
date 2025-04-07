@@ -67,6 +67,7 @@ export function Component() {
   }
 
   // 准备图表数据
+  // @ts-ignore
   const chartData = Object.entries(data.mbti_statistics || {}).map(
     ([type, count]) => ({
       mbti: type,
@@ -91,6 +92,7 @@ export function Component() {
   }
 
   // 计算总人数
+  // @ts-ignore
   const totalUsers = chartData.reduce((acc, curr) => acc + curr.users, 0);
 
   // 创建图表配置
@@ -179,14 +181,18 @@ export function Component() {
       </CardContent>
       <CardFooter className='flex-col gap-2 text-sm'>
         <div className='flex items-center gap-2 font-medium leading-none'>
+          {/* @ts-ignore */}
           {data.mbti_statistics &&
+            // @ts-ignore
             Object.keys(data.mbti_statistics).length > 0 &&
+            // @ts-ignore
             `共有 ${Object.keys(data.mbti_statistics).length} 种MBTI类型`}
           <TrendingUp className='h-4 w-4' />
         </div>
         <div className='leading-none text-muted-foreground'>
           排名前三的性格类型:{' '}
           {chartData
+            // @ts-ignore
             .sort((a, b) => b.users - a.users)
             .slice(0, 3)
             .map((item) => item.mbti)
