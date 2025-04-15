@@ -277,6 +277,30 @@ export const useAdminDeleteUser = (userId: string) => {
   });
 };
 
+/**
+ * ### 重置用户密码
+ * @param userId 用户ID
+ * @returns 重置密码的mutation函数和状态
+ */
+export const useAdminResetUserPassword = (userId: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await post<{ 
+        success: boolean; 
+        message: string;
+        new_password: string;
+      }>(`/admin/users/${userId}/reset-password/`, {});
+      return response;
+    },
+    onSuccess: () => {
+      // 重置成功后，刷新用户详情
+      queryClient.invalidateQueries({ queryKey: ['admin', 'user', userId] });
+    },
+  });
+};
+
 // 以下是帖子管理相关的 hooks
 
 /**

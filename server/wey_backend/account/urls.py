@@ -21,6 +21,7 @@ urlpatterns = [
     path('mibt/result/', api.get_mibt_result, name='get_mibt_result'),
     path('mibt/result/<uuid:user_id>/', api.get_mibt_result, name='get_user_mibt_result'),
     path('mibt/statistics/', api.get_mbti_statistics, name='get_mbti_statistics'),
+    path('change-password/', api.change_password, name='change_password'),
     
     # 管理员API
     path('admin/users/', admin_api.admin_users_list, name='admin_users_list'),
@@ -30,4 +31,5 @@ urlpatterns = [
     path('admin/users/<uuid:user_id>/update/', admin_api.admin_update_user, name='admin_update_user'),
     path('admin/users/<uuid:user_id>/delete/', admin_api.admin_delete_user, name='admin_delete_user'),
     path('admin/users/<uuid:user_id>/toggle-admin/', admin_api.admin_toggle_admin_status, name='admin_toggle_admin_status'),
+    path('admin/users/<uuid:user_id>/reset-password/', admin_api.admin_reset_user_password, name='admin_reset_user_password'),
 ]

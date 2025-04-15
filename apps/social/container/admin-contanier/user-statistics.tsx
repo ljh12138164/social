@@ -15,7 +15,7 @@ import { useAdminUserStatistics, useAdminPostStatistics, useAdminDeleteTrend } f
 import dayjs from 'dayjs';
 import { ShieldCheck, TrendingUp, UserCheck, Users, UserX, MessageSquare, Trash } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { toast } from 'sonner';
+import { toast } from 'react-hot-toast';
 import {
   Dialog,
   DialogContent,
@@ -27,7 +27,7 @@ import {
 import { Button } from '@/components/ui/button';
 import React from 'react';
 
-const UserStatistics = () => {
+const UserStatistics = ({ children }: { children?: React.ReactNode }) => {
   const { data: userData, isLoading: userLoading } = useAdminUserStatistics();
   const { data: postData, isLoading: postLoading } = useAdminPostStatistics();
 
@@ -89,19 +89,19 @@ const UserStatistics = () => {
           colorClass='text-blue-600 bg-blue-100'
         />
       </div>
-
-      <div className='grid gap-4'>
+      {children}
+      {/* <div className='grid gap-4'>
         <Card>
           <CardHeader>
             <CardTitle>用户数据分析</CardTitle>
-            <CardDescription>用户增长和注册情况统计</CardDescription>
+            <CardDescription>最近注册人数</CardDescription>
           </CardHeader>
           <CardContent>
-            <Tabs defaultValue="chart" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
+            <Tabs defaultValue="list" className="w-full">
+             <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="chart">新增趋势</TabsTrigger>
                 <TabsTrigger value="list">最近注册</TabsTrigger>
-              </TabsList>
+              </TabsList> 
               
               <TabsContent value="chart" className="space-y-4">
                 <div className='h-[300px]'>
@@ -164,7 +164,7 @@ const UserStatistics = () => {
             </Tabs>
           </CardContent>
         </Card>
-      </div>
+      </div> */}
 
       <Card>
         <CardHeader>

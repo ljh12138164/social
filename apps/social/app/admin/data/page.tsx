@@ -4,6 +4,7 @@ import { withAuth } from '@/container/auth-contanier/AuthContainer';
 import { useProfile } from '@/http/useAuth';
 import { useRouter } from 'next/navigation';
 import UserStatistics from '@/container/admin-contanier/user-statistics';
+import AdminDashboard from '@/container/admin-contanier/admin-dashboard';
 
 const AdminDataPage = () => {
   const { data: profile, isLoading } = useProfile();
@@ -30,7 +31,9 @@ const AdminDataPage = () => {
   return (
     <div>
       <h2 className='mb-4 text-2xl font-semibold'>数据统计</h2>
-      <UserStatistics />
+      <UserStatistics>
+        <AdminDashboard />
+      </UserStatistics>
     </div>
   );
 };

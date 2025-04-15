@@ -28,22 +28,26 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { useAdminDeleteUser, useAdminUsersList, User } from '@/http/useAdmin';
+import { useAdminDeleteUser, useAdminUsersList, useAdminResetUserPassword, User } from '@/http/useAdmin';
 import dayjs from 'dayjs';
 import { debounce } from 'lodash-es';
-import { Edit, MoreHorizontal, RefreshCw, Search, Trash } from 'lucide-react';
+import { Edit, MoreHorizontal, RefreshCw, Search, Trash, Key } from 'lucide-react';
 import { useState } from 'react';
 import { flushSync } from 'react-dom';
 import UserEditModal from './user-edit-modal';
+import { toast } from 'react-hot-toast';
 
 const UserManagement = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
 
   const { data, isLoading, refetch } = useAdminUsersList(searchTerm);
   const deleteUser = useAdminDeleteUser(selectedUser?.id || '');
+  const resetPassword = useAdminResetUserPassword(selectedUser?.id || '');
 
   const debouncedSearch = debounce(
     (value: string) => {
@@ -70,6 +74,13 @@ const UserManagement = () => {
     });
   };
 
+  const handleResetPassword = (user: User) => {
+    flushSync(() => {
+      setSelectedUser(user);
+      setResetPasswordDialogOpen(true);
+    });
+  };
+
   // 关闭编辑模态框时重置选中的用户
   const handleEditModalChange = (open: boolean) => {
     setEditModalOpen(open);
@@ -92,6 +103,20 @@ const UserManagement = () => {
       refetch();
     } catch {}
   };
+
+  const confirmResetPassword = async () => {
+    if (!selectedUser) return;
+
+    try {
+      const result = await resetPassword.mutateAsync();
+      setNewPassword(result.new_password);
+      // 不关闭对话框，而是显示新密码
+    } catch (error) {
+      toast.error('重置密码失败');
+      setResetPasswordDialogOpen(false);
+    }
+  };
+
   return (
     <div className='p-1'>
       <div className='mb-6 flex items-center gap-3'>
@@ -201,6 +226,13 @@ const UserManagement = () => {
                           <span>编辑</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem
+                          onClick={() => handleResetPassword(user)}
+                          className='cursor-pointer hover:text-purple focus:text-purple'
+                        >
+                          <Key className='mr-2 h-4 w-4' />
+                          <span>重置密码</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
                           onClick={() => handleDelete(user)}
                           className='text-red-500 hover:text-red-600 focus:text-red-600 cursor-pointer'
                         >
@@ -263,6 +295,72 @@ const UserManagement = () => {
             >
               {deleteUser.isPending ? '正在删除...' : '确认删除'}
             </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 重置密码确认对话框 */}
+      <Dialog open={resetPasswordDialogOpen} onOpenChange={setResetPasswordDialogOpen}>
+        <DialogContent className='rounded-xl max-w-md'>
+          <DialogHeader>
+            <DialogTitle className='text-xl'>
+              {newPassword ? '密码已重置' : '确认重置密码'}
+            </DialogTitle>
+            <DialogDescription className='text-gray-600 mt-2'>
+              {!newPassword ? (
+                <>
+                  你确定要重置用户{' '}
+                  <span className='font-medium text-black'>
+                    "{selectedUser?.name}"
+                  </span>
+                  <span className='text-gray-500'>({selectedUser?.email})</span>{' '}
+                  的密码吗？
+                  <div className='mt-1 text-amber-500 text-sm'>
+                    重置后将生成新的随机密码。
+                  </div>
+                </>
+              ) : (
+                <>
+                  用户{' '}
+                  <span className='font-medium text-black'>
+                    "{selectedUser?.name}"
+                  </span>
+                  <span className='text-gray-500'>({selectedUser?.email})</span>{' '}
+                  的密码已重置。
+                  <div className='mt-4 bg-gray-100 p-3 rounded-lg'>
+                    <div className='text-sm text-gray-600'>新密码:</div>
+                    <div className='font-medium text-lg mt-1 text-purple break-all'>
+                      {newPassword}
+                    </div>
+                  </div>
+                  <div className='mt-2 text-amber-500 text-sm'>
+                    请妥善保存此密码，关闭对话框后将无法再次查看！
+                  </div>
+                </>
+              )}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className='gap-2 sm:justify-end mt-4'>
+            <Button
+              variant='outline'
+              onClick={() => {
+                setResetPasswordDialogOpen(false);
+                setNewPassword('');
+                setSelectedUser(null);
+              }}
+            >
+              {newPassword ? '关闭' : '取消'}
+            </Button>
+            {!newPassword && (
+              <Button
+                type='button'
+                onClick={confirmResetPassword}
+                // className='bg-purple hover:bg-purple-dark'
+                disabled={resetPassword.isPending}
+              >
+                {resetPassword.isPending ? '处理中...' : '确认重置'}
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -4,6 +4,7 @@ from django.contrib.auth.hashers import make_password
 from django.db.models import Count
 from django.db.models.functions import TruncDate
 from datetime import datetime, timedelta
+import nanoid
 
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAdminUser, BasePermission
@@ -254,4 +255,24 @@ def admin_toggle_admin_status(request, user_id):
         'success': True,
         'message': f"用户管理员状态已更新为: {'管理员' if is_admin else '普通用户'}",
         'user': serializer.data
+    })
+
+
+@api_view(['POST'])
+@permission_classes([IsAdminPermission])
+def admin_reset_user_password(request, user_id):
+    """重置用户密码，仅限管理员访问"""
+    user = get_object_or_404(User, id=user_id)
+    
+    # 生成随机密码，使用nanoid
+    new_password = nanoid.generate(size=10)
+    
+    # 更新用户密码
+    user.password = make_password(new_password)
+    user.save()
+    
+    return JsonResponse({
+        'success': True,
+        'message': '密码已重置',
+        'new_password': new_password
     }) 

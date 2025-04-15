@@ -5,6 +5,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Post } from './usePost';
 import toast from 'react-hot-toast';
 import { MBTIResult } from '@/container/mibt-contanier/MBTITest';
+import { clearTokens } from './useAuth';
+import { useRouter } from 'next/navigation';
 
 export interface UserProfile {
   id: string;
@@ -31,6 +33,12 @@ interface UpdateProfileData {
   name: string;
   bio?: string;
   avatar?: File;
+}
+
+interface ChangePasswordData {
+  old_password: string;
+  new_password: string;
+  confirm_password: string;
 }
 
 /**
@@ -135,6 +143,34 @@ export const useSendFriendRequest = (userId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['userProfile', userId] });
       toast.success('发送好友请求成功');
+    },
+  });
+};
+
+/**
+ * ### 修改用户密码
+ */
+export const useChangePassword = () => {
+  const router = useRouter();
+  return useMutation({
+    mutationFn: async (data: ChangePasswordData) => {
+      const response = await post<{ success: boolean; message: string }>(
+        '/change-password/',
+        data
+      );
+      return response;
+    },
+    onSuccess: () => {
+      toast.dismiss();
+      // toast.success('密码修改成功，请重新登录');
+      setTimeout(() => {
+        clearTokens();
+        router.push('/auth');
+      }, 1000);
+    },
+    onError: (error: any) => {
+      const message = error.response?.data?.message || '密码修改失败';
+      toast.error(message);
     },
   });
 };

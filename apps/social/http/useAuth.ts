@@ -42,7 +42,7 @@ const saveTokens = (tokens: TokenResponse) => {
 /**
  * ### 清除本地存储的令牌
  */
-const clearTokens = () => {
+export const clearTokens = () => {
   localStorage.removeItem('access_token');
   localStorage.removeItem('refresh_token');
 };

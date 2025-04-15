@@ -60,7 +60,7 @@ const AdminContainer = ({ children }: { children?: React.ReactNode }) => {
               </p>
             </div>
             <SidebarMenu>
-              <SidebarMenuButton
+              {/* <SidebarMenuButton
                 isActive={activePath === 'home'}
                 onClick={() => router.push('/admin/home')}
                 className={cn(
@@ -72,7 +72,7 @@ const AdminContainer = ({ children }: { children?: React.ReactNode }) => {
               >
                 <ChartLine className='mr-3 h-5 w-5' />
                 <span>管理员仪表盘</span>
-              </SidebarMenuButton>
+              </SidebarMenuButton> */}
               <SidebarMenuButton
                 isActive={activePath === 'user'}
                 onClick={() => router.push('/admin/user')}

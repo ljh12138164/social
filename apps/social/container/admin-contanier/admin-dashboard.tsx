@@ -80,6 +80,7 @@ const AdminDashboard: React.FC = () => {
   const getUserActivityData = () => {
     if (!dashboardData) return [];
     const { user_activity_rate } = dashboardData.averages;
+    
     return [
       { name: '活跃用户', value: user_activity_rate },
       { name: '非活跃用户', value: 100 - user_activity_rate },
@@ -97,9 +98,7 @@ const AdminDashboard: React.FC = () => {
 
   return (
     <div className='container mx-auto p-4'>
-      <h1 className='text-3xl font-bold mb-6'> 可视化表盘 </h1>
-
-      {isDashboardLoading ? (
+      {/* {isDashboardLoading ? (
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8'>
           {[...Array(4)].map((_, i) => (
             <Card key={i}>
@@ -168,7 +167,7 @@ const AdminDashboard: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-      )}
+      )} */}
 
       <div className='grid grid-cols-1 md:grid-cols-2 gap-6 mb-8'>
         <Card>
@@ -357,7 +356,7 @@ const AdminDashboard: React.FC = () => {
         </TabsContent>
 
         <TabsContent value='posts'>
-          <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+          <div className='grid grid-cols-1  gap-6'>
             <Card>
               <CardHeader>
                 <CardTitle>帖子发布趋势</CardTitle>
@@ -392,7 +391,7 @@ const AdminDashboard: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card>
+            {/* <Card>
               <CardHeader>
                 <CardTitle>公开/私密帖子比例</CardTitle>
                 <CardDescription>帖子隐私设置分布</CardDescription>
@@ -423,7 +422,7 @@ const AdminDashboard: React.FC = () => {
                   </ResponsiveContainer>
                 )}
               </CardContent>
-            </Card>
+            </Card> */}
           </div>
         </TabsContent>
 

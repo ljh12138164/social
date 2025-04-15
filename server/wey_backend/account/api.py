@@ -7,6 +7,7 @@ from django.db.models import Count
 
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.permissions import IsAuthenticated
 
 from notification.utils import create_notification
 
@@ -289,3 +290,39 @@ def get_mbti_statistics(request):
     ]
     
     return JsonResponse(result, safe=False)
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def change_password(request):
+    """修改用户密码"""
+    data = request.data
+    
+    # 验证必填字段
+    if not all(key in data for key in ['old_password', 'new_password', 'confirm_password']):
+        return JsonResponse({
+            'success': False,
+            'message': '请提供所有必需的字段'
+        }, status=400)
+    
+    # 验证新密码和确认密码是否匹配
+    if data['new_password'] != data['confirm_password']:
+        return JsonResponse({
+            'success': False,
+            'message': '新密码和确认密码不匹配'
+        }, status=400)
+    
+    # 验证旧密码是否正确
+    if not request.user.check_password(data['old_password']):
+        return JsonResponse({
+            'success': False,
+            'message': '旧密码不正确'
+        }, status=400)
+    
+    # 更新密码
+    request.user.set_password(data['new_password'])
+    request.user.save()
+    
+    return JsonResponse({
+        'success': True,
+        'message': '密码修改成功'
+    })
