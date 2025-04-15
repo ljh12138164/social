@@ -22,13 +22,14 @@ const profileSchema = z.object({
   name: z.string().min(2, '名字至少需要2个字符'),
   bio: z.string().max(500, '简介不能超过500个字符').optional(),
   avatar: z.string().optional(),
-  oldPassword: z.string().min(1, '请输入旧密码'),
-  newPassword: z.string().min(6, '新密码至少需要6个字符'),
-  confirmPassword: z.string().min(6, '确认密码至少需要6个字符'),
-}).refine((data) => data.newPassword === data.confirmPassword, {
-  message: "新密码和确认密码不匹配",
-  path: ["confirmPassword"],
-});
+})
+  // oldPassword: z.string().min(1, '请输入旧密码'),
+  // newPassword: z.string().min(6, '新密码至少需要6个字符'),
+  // confirmPassword: z.string().min(6, '确认密码至少需要6个字符'),
+// }).refine((data) => data.newPassword === data.confirmPassword, {
+//   message: "新密码和确认密码不匹配",
+//   path: ["confirmPassword"],
+// });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
@@ -49,9 +50,9 @@ export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
       name: defaultValues?.name || '',
       bio: defaultValues?.bio || '',
       avatar: defaultValues?.avatar || '',
-      oldPassword: '',
-      newPassword: '',
-      confirmPassword: '',
+      // oldPassword: '',
+      // newPassword: '',
+      // confirmPassword: '',
     },
   });
 
@@ -65,19 +66,19 @@ export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
   const onSubmit = async (data: ProfileFormValues) => {
     try {
       // 如果有修改密码的数据，先处理密码修改
-      if (data.oldPassword && data.newPassword) {
-        try {
-          await axios.post('/api/account/editpassword', {
-            old_password: data.oldPassword,
-            new_password1: data.newPassword,
-            new_password2: data.confirmPassword,
-          });
-          toast.success('密码修改成功');
-        } catch (error) {
-          toast.error('密码修改失败，请检查旧密码是否正确');
-          return;
-        }
-      }
+      // if (data.oldPassword && data.newPassword) {
+      //   try {
+      //     await axios.post('/api/account/editpassword', {
+      //       old_password: data.oldPassword,
+      //       new_password1: data.newPassword,
+      //       new_password2: data.confirmPassword,
+      //     });
+      //     toast.success('密码修改成功');
+      //   } catch (error) {
+      //     toast.error('密码修改失败，请检查旧密码是否正确');
+      //     return;
+      //   }
+      // }
 
       // 处理个人资料更新
       updateProfile.mutate(
@@ -149,29 +150,6 @@ export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
                 </p>
               )}
             </div>
-            {/* 
-            <div className='relative border border-gray-200 dark:border-gray-800 rounded-2xl px-2 focus-within:border-blue-500 transition-all hover:border-blue-500/50'>
-              <Label
-                htmlFor='email'
-                className='bg-background px-2 text-xs text-muted-foreground flex items-center gap-1'
-              >
-                <Mail className='w-3 h-3' />
-                邮箱
-              </Label>
-              <Input
-                id='email'
-                type='email'
-                {...form.register('email')}
-                placeholder='请输入你的邮箱'
-                className='border-0 p-0 text-lg focus-visible:ring-0 placeholder:text-muted-foreground/50'
-              />
-              {form.formState.errors.email && (
-                <p className='text-sm text-red-500 mt-1 flex items-center gap-1'>
-                  <span className='inline-block w-1 h-1 rounded-full bg-red-500' />
-                  {form.formState.errors.email.message}
-                </p>
-              )}
-            </div> */}
 
             <Label
               htmlFor='bio'
@@ -195,7 +173,7 @@ export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
               )}
             </div>
 
-            <div className='border-t border-gray-200 dark:border-gray-800 pt-6 mt-6'>
+            {/* <div className='border-t border-gray-200 dark:border-gray-800 pt-6 mt-6'>
               <Label
                 htmlFor='password'
                 className='bg-background px-4 text-xs text-muted-foreground flex items-center gap-1 border-r border-gray-200 dark:border-gray-800'
@@ -250,7 +228,7 @@ export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
                   </p>
                 )}
               </div>
-            </div>
+            </div> */}
           </div>
 
           <div className='sticky bottom-0 bg-background/80 backdrop-blur-sm py-4 -mx-8 px-8 border-t mt-6'>
@@ -275,6 +253,7 @@ export const ProfileEditForm = ({ defaultValues }: ProfileEditFormProps) => {
             </section>
           </div>
         </form>
+        
       </ScrollArea>
     </div>
   );

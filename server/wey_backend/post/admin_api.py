@@ -281,4 +281,22 @@ def admin_post_statistics(request):
         'most_commented': most_commented_serializer.data,
         'most_liked': most_liked_serializer.data,
         'trends': trends_data
-    }) 
+    })
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAdminPermission])
+def admin_delete_trend(request, hashtag):
+    """管理员删除热门话题"""
+    try:
+        trend = Trend.objects.get(hashtag=hashtag)
+        trend.delete()
+        return JsonResponse({
+            'success': True,
+            'message': f'热门话题 #{hashtag} 已成功删除'
+        })
+    except Trend.DoesNotExist:
+        return JsonResponse({
+            'success': False,
+            'message': f'热门话题 #{hashtag} 不存在'
+        }, status=404) 

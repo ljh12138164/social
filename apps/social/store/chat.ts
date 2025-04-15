@@ -9,6 +9,9 @@ interface NotificationMessage {
 }
 
 interface ChatStore {
+  // ai
+  themeList: Set<string>;
+  setThemeList: (strings: string) => void;
   // 未读消息计数，按会话ID存储
   unreadMessages: Record<string, number>;
   // 通知消息，按会话ID存储最新消息
@@ -30,10 +33,13 @@ interface ChatStore {
 export const useChatStore = create<ChatStore>()(
   persist(
     (set) => ({
+      themeList: new Set(),
       unreadMessages: {},
       notifications: {},
       activeConversationId: null,
-
+      setThemeList: (string) => {
+        set((state) => ({ themeList: state.themeList.add(string) }));
+      },
       addUnreadMessage: (conversationId, message, sendId) =>
         set((state) => {
           // 如果是当前活跃的会话，不增加未读计数

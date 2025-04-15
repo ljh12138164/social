@@ -767,3 +767,25 @@ export const useUserNetworkVisualization = () => {
     },
   });
 };
+
+/**
+ * ### 删除热门话题
+ * @param hashtag 话题标签
+ * @returns 删除话题的mutation函数和状态
+ */
+export const useAdminDeleteTrend = (hashtag: string) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async () => {
+      const response = await del<{ success: boolean; message: string }>(
+        `/posts/admin/trends/${hashtag}/delete/`
+      );
+      return response;
+    },
+    onSuccess: () => {
+      // 删除成功后，刷新帖子统计数据
+      queryClient.invalidateQueries({ queryKey: ['admin', 'posts', 'stats'] });
+    },
+  });
+};

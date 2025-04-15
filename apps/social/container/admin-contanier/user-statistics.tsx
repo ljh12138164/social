@@ -11,10 +11,21 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useAdminUserStatistics, useAdminPostStatistics } from '@/http/useAdmin';
+import { useAdminUserStatistics, useAdminPostStatistics, useAdminDeleteTrend } from '@/http/useAdmin';
 import dayjs from 'dayjs';
-import { ShieldCheck, TrendingUp, UserCheck, Users, UserX, MessageSquare } from 'lucide-react';
+import { ShieldCheck, TrendingUp, UserCheck, Users, UserX, MessageSquare, Trash } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import React from 'react';
 
 const UserStatistics = () => {
   const { data: userData, isLoading: userLoading } = useAdminUserStatistics();
@@ -182,7 +193,10 @@ const UserStatistics = () => {
                       </p>
                     </div>
                   </div>
-                  <TrendingUp className='h-5 w-5 text-primary' />
+                  <div className='flex items-center gap-2'>
+                    <TrendingUp className='h-5 w-5 text-primary' />
+                    <DeleteTrendButton hashtag={trend.hashtag} />
+                  </div>
                 </div>
               ))
             ) : (
@@ -223,5 +237,57 @@ const StatCard = ({
     </CardContent>
   </Card>
 );
+
+interface DeleteTrendButtonProps {
+  hashtag: string;
+}
+
+const DeleteTrendButton = ({ hashtag }: DeleteTrendButtonProps) => {
+  const { mutate: deleteTrend, isPending } = useAdminDeleteTrend(hashtag);
+  const [open, setOpen] = React.useState(false);
+
+  const handleDelete = () => {
+    deleteTrend(undefined, {
+      onSuccess: (data) => {
+        toast.success(data.message);
+        setOpen(false);
+      },
+      onError: (error) => {
+        toast.error('删除失败：' + (error as any).message);
+      }
+    });
+  };
+
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className='p-1 text-destructive hover:bg-destructive/10 rounded-full transition-colors'
+        title='删除话题'
+      >
+        <Trash className='h-4 w-4' />
+      </button>
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>删除热门话题</DialogTitle>
+            <DialogDescription>
+              确定要删除话题 #{hashtag} 吗？此操作无法撤销。
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="ghost" onClick={() => setOpen(false)}>
+              取消
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isPending}>
+              {isPending ? '删除中...' : '确认删除'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+};
 
 export default UserStatistics;

@@ -27,6 +27,7 @@ import { ActiveConversation } from './ChatContainer';
 import { MessageInput } from './MessageInput';
 import Markdown from 'react-markdown';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useChatStore } from '@/store/chat';
 interface ChatBoxProps {
   conversation: ActiveConversation;
   userId?: string;
@@ -42,15 +43,18 @@ export const ChatBox = ({
 }: ChatBoxProps) => {
   const { data: profile } = useProfile();
   const queryClient = useQueryClient();
+  const { themeList } = useChatStore();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const [typingStatus, setTypingStatus] = useState<string | null>(null);
   const [showDogCard, setShowDogCard] = useState(false);
-
+  const [inputMessage, setInputMessage] = useState('');
+  console.log(themeList);
   const {
     mutate: aiChat,
     isPending: isAiChatLoading,
     streamResponse,
     setStreamResponse,
+    exampleResponses,
   } = useAiChat();
 
   console.log(streamResponse);
@@ -120,6 +124,14 @@ export const ChatBox = ({
   const formatMessageTime = (dateString?: string) => {
     if (!dateString) return '';
     return format(new Date(dateString), 'HH:mm', { locale: zhCN });
+  };
+
+  // 处理话题点击
+  const handleThemeClick = (theme: string) => {
+    if (theme) {
+      // 直接发送消息
+      handleSendMessage(theme);
+    }
   };
 
   return (
@@ -330,99 +342,103 @@ export const ChatBox = ({
                 >
                   <Card className='p-4 shadow-lg border-green-200 w-[600px]'>
                     <CardContent className='p-2'>
-                      {isAiChatLoading ? (
-                        <div className='flex justify-center py-10 w-f'>
-                          <div className='flex flex-col items-center'>
-                            <div className='w-8 h-8 border-4 border-green-200 border-t-green-500 rounded-full animate-spin'></div>
-                            <p className='text-gray-500 mt-2 text-sm'>
-                              加载消息中...
-                            </p>
+                      {!streamResponse ? (
+                        <>
+                          <div className='flex items-center space-x-4'>
+                            <Image
+                              src='/chat.webp'
+                              alt='小狗助手'
+                              width={50}
+                              height={50}
+                              className='rounded-full'
+                            />
+                            <div>
+                              <h3 className='font-medium'>线条小狗</h3>
+                              <p className='text-sm text-gray-500'>AI助手</p>
+                            </div>
                           </div>
-                        </div>
+                          <div className='mt-3 text-sm'>
+                            <p>
+                              哈喽，我是线条小狗，不知道怎么继续聊下去吗？让我来帮帮你吧。
+                            </p>
+                            <p className='text-xs text-gray-400 mt-1'>
+                              (注意: 我会查看你们之前的聊天记录，介意就别了~)
+                            </p>
+                            <div className='flex justify-between mt-2'>
+                              <Button
+                                variant='outline'
+                                onClick={() => setShowDogCard(false)}
+                              >
+                                不需要了
+                              </Button>
+                              <Button
+                                onClick={() => {
+                                  const data =
+                                    queryClient.getQueryData<ChatMessage[]>([
+                                      'chatHistory',
+                                      conversation.id,
+                                    ]) ?? [];
+
+                                  const input = data
+                                    .slice(0, 10)
+                                    .map((item) => ({
+                                      user_id: item.sendId,
+                                      lines: item.message,
+                                    }));
+
+                                  aiChat({
+                                    params: {
+                                      input,
+                                      requester: userId ?? '',
+                                    },
+                                  });
+                                }}
+                              >
+                                帮帮我们
+                              </Button>
+                            </div>
+                          </div>
+                        </>
                       ) : (
                         <>
-                          {streamResponse ? (
-                            <>
-                              <p className='font-bold text-xl mb-3'>
-                                情感分析及建议:
-                              </p>
-                              <ScrollArea className='h-[150px] pr-4'>
-                                <div className='space-y-2'>
-                                  <Markdown>{streamResponse}</Markdown>
-                                  <div className='flex justify-end mt-4'>
-                                    <Button
-                                      variant='outline'
-                                      onClick={() => {
-                                        setShowDogCard(false);
-                                        setStreamResponse('');
-                                      }}
-                                    >
-                                      我知道了
-                                    </Button>
+                          <p className='font-bold text-xl mb-3'>
+                            情感分析及建议:
+                          </p>
+                          <ScrollArea className='h-[150px] pr-4'>
+                            <div className='space-y-2'>
+                              {isAiChatLoading &&
+                              streamResponse.length === 0 ? (
+                                <div className='flex justify-center py-2'>
+                                  <div className='flex flex-col items-center'>
+                                    <div className='w-6 h-6 border-3 border-green-200 border-t-green-500 rounded-full animate-spin'></div>
+                                    <p className='text-gray-500 mt-2 text-xs'>
+                                      思考中...
+                                    </p>
                                   </div>
                                 </div>
-                              </ScrollArea>
-                            </>
-                          ) : (
-                            <>
-                              <div className='flex items-center space-x-4'>
-                                <Image
-                                  src='/chat.webp'
-                                  alt='小狗助手'
-                                  width={50}
-                                  height={50}
-                                  className='rounded-full'
-                                />
-                                <div>
-                                  <h3 className='font-medium'>线条小狗</h3>
-                                  <p className='text-sm text-gray-500'>
-                                    AI助手
-                                  </p>
-                                </div>
+                              ) : (
+                                <>
+                                  <Markdown>{streamResponse}</Markdown>
+                                  {isAiChatLoading && (
+                                    <span className='inline-block animate-pulse'>
+                                      ▌
+                                    </span>
+                                  )}
+                                </>
+                              )}
+                              <div className='flex justify-end mt-4'>
+                                <Button
+                                  variant='outline'
+                                  onClick={() => {
+                                    setShowDogCard(false);
+                                    setStreamResponse('');
+                                  }}
+                                >
+                                  我知道了
+                                </Button>
                               </div>
-                              <div className='mt-3 text-sm'>
-                                <p>
-                                  哈喽，我是线条小狗，不知道怎么继续聊下去吗？让我来帮帮你吧。
-                                </p>
-                                <p className='text-xs text-gray-400 mt-1'>
-                                  (注意:
-                                  我会查看你们之前的聊天记录，介意就别了~)
-                                </p>
-                                <div className='flex justify-between mt-2'>
-                                  <Button
-                                    variant='outline'
-                                    onClick={() => setShowDogCard(false)}
-                                  >
-                                    不需要了
-                                  </Button>
-                                  <Button
-                                    onClick={() => {
-                                      const data =
-                                        queryClient.getQueryData<ChatMessage[]>(
-                                          ['chatHistory', conversation.id]
-                                        ) ?? [];
-
-                                      const input = data
-                                        .slice(0, 10)
-                                        .map((item) => ({
-                                          user_id: item.sendId,
-                                          lines: item.message,
-                                        }));
-
-                                      aiChat({
-                                        params: {
-                                          input,
-                                          requester: userId ?? '',
-                                        },
-                                      });
-                                    }}
-                                  >
-                                    帮帮我们
-                                  </Button>
-                                </div>
-                              </div>
-                            </>
-                          )}
+                            </div>
+                          </ScrollArea>
                         </>
                       )}
                     </CardContent>
@@ -433,6 +449,32 @@ export const ChatBox = ({
           </AnimatePresence>
         </div>
       </div>
+
+      {/* 话题列表 */}
+      {themeList.size > 0 && (
+        <div className='px-4 py-2 border-t border-gray-100'>
+          <div className='flex items-center flex-wrap gap-2'>
+            <span className='text-xs text-gray-500'>推荐话题：</span>
+            {Array.from(themeList).map((theme, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.3, delay: index * 0.1 }}
+              >
+                <Button
+                  variant='outline'
+                  size='sm'
+                  className='rounded-full text-xs py-1 h-auto bg-gray-50 hover:bg-gray-100'
+                  onClick={() => handleThemeClick(theme)}
+                >
+                  {theme}
+                </Button>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* 消息输入框 */}
       <MessageInput
